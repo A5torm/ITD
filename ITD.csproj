@@ -298,4 +298,8 @@
     <Folder Include="Content\Buffs\MinionBuffs\" />
   </ItemGroup>
 	
+  <ItemGroup>
+    <None Include="Content\Projectiles\Hostile\MotherWisp\WispTelegraph2.cs" />
+  </ItemGroup>
+	
 </Project>

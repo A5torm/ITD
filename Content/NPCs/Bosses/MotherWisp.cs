@@ -54,6 +54,10 @@ public class MotherWisp : ModNPC
         Fireburst,
         SingNote,
         Stomp,
+        FlySlam,
+        FireRing,
+        FireDash,
+        FireSpin,
         ToTarget,
     }
     bool expertMode = Main.expertMode;
@@ -147,6 +151,11 @@ public class MotherWisp : ModNPC
                     break;
                 SpiritStomp(player, Candle);
                 break;
+            case ActionState.FlySlam:
+                if (Phase <= 0) 
+                    break;
+                FlyingSlam(player);
+                    break;
             case ActionState.ToTarget:
                 if (P2Check())
                     break;
@@ -175,7 +184,7 @@ public class MotherWisp : ModNPC
         return (int)(damage / 1);
     }
     float speedMult = 1;
-    float scaleMult = 2;
+    float scaleMult = 1.5f;
     float scaleMultMax = 1.5f;
     float pulseScale = 0;
     public void Spawning(NPC candle)
@@ -189,7 +198,7 @@ public class MotherWisp : ModNPC
         if (aiTimer0 >= morphTime)
         {
             aiTimer0 = 0;
-            AI_State = ActionState.SingNote;
+            AI_State = ActionState.Jump;
         }
     }
     float maxDist = 600;//if farther than this, force jump
@@ -329,7 +338,7 @@ public class MotherWisp : ModNPC
             RaycastData data = Helpers.QuickRaycast(pos, vel, (point) => { return (player.Bottom.Y >= point.ToWorldCoordinates().Y + 20); }, 120);
             Projectile rain = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(),
                 pos, vel,
-                ModContent.ProjectileType<WispTelegraph>(), damage, 0, -1, 0, data.End.Y);
+                ModContent.ProjectileType<WispTelegraph>(), damage, 0, -1, 0, data.End.Y,60);
         }
     }
     public void SpiritSong(Player player, NPC candle)
@@ -473,6 +482,39 @@ public class MotherWisp : ModNPC
         }
     }
 
+    public void FlyingSlam(Player player)
+    {
+        float slamTime = 120;
+        NPC.scale = scaleMult;
+        aiTimer0++;
+
+        if (aiTimer0 >= slamTime)
+        {
+            DoSlam(player);
+            // GetNextAttack(player, ActionState.FireRing);
+            NPC.netUpdate = true;
+        }
+        else if (aiTimer0 >= slamTime / 2 && aiTimer0 < slamTime)
+        {
+            NPC.velocity *= 0.9f;
+        }
+        else
+        {
+            NPC.velocity.X *= 0.9f;
+            NPC.velocity.Y = 15;
+        }
+        if (aiTimer0 <= slamTime / 1.75f)
+        {
+            if (aiTimer2++ % 10 == 0)
+            {
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    Vector2 vel = Vector2.Normalize(Vector2.UnitY).RotatedBy((Math.PI / 2 ) * i);
+                    Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center - new Vector2(NPC.width * i,0), vel, ModContent.ProjectileType<WispTelegraph2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1,0,0, (slamTime) - aiTimer2);
+                }
+            }
+        }
+    }
     public void ResetStats()
     {
         aiTimer0 = 0;
@@ -497,33 +539,96 @@ public class MotherWisp : ModNPC
         ResetStats();
         NPC.netUpdate = true;
     }
+
+    private void KillCandleSafe()
+    {
+        NPC candle = MiscHelpers.NPCExists(OwnerIndex, ModContent.NPCType<WispCandle>());
+        if (candle != null && candle.active)
+        {
+            candle.ai[1] = 3;
+            candle.netUpdate = true;
+        }
+    }
     public void WispUnleashed(Player player, NPC candle)
     {
-        float morphTime = 120;
+        float morphTime = 180;
         NPC.dontTakeDamage = true;
+
         if (NPC.buffType[0] != 0)
             NPC.DelBuff(0);
-        if (++aiTimer0 > morphTime)
+
+        aiTimer0++;
+
+        if (aiTimer0 < morphTime)
         {
-            scaleMultMax = 2f;
-            Phase = 1;
-            candle.hide = true;
-            NPC.Center = player.Center;
-            NPC.dontTakeDamage = false;
+            if (candle != null && candle.active)
+            {
+                NPC.Center = Vector2.Lerp(NPC.Center, new Vector2(candle.Center.X, candle.Top.Y - (NPC.height) * scaleMult), 0.1f);
+            }
+
+            NPC.velocity = Vector2.Zero;
+            NPC.scale = scaleMult;
+            scaleMultMax = MathHelper.Lerp(1.5f, 2.25f, aiTimer0 / morphTime);
         }
         else if (aiTimer0 == morphTime)
         {
             SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+            KillCandleSafe();
+            NPC.velocity = new Vector2(0, -5f);
+        }
+        else if (aiTimer0 > morphTime)
+        {
+            Phase = 1;
+            NPC.dontTakeDamage = false;
+            ResetStats();
+            AI_State = ActionState.FlySlam;
+            NPC.netUpdate = true;
+        }
+    }
+    float time = 0;
+    float gravity = 0.4f;
+    private void DoSlam(Player player)
+    {
+        if (aiTimer1 == 0)
+        {
+            Vector2 distance = NPC.Top - NPC.Bottom;
+
+            time = 80f;
+            distance = new Vector2(player.Top.X,player.Top.Y - NPC.height * 4) - NPC.Bottom;
+        
+            for (int i = 0; i < 4; i++)
+            {
+                int side = i % 2 == 0 ? 1 : -1;
+                float speed = Main.rand.NextFloat(4, 6);
+                Vector2 vel = (Vector2.UnitX * side * speed).RotatedByRandom(MathHelper.Pi / 11);
+                emitter?.Emit(NPC.Bottom, vel, 0f, 20);
+            }
+            distance.X /= time;
+            distance.Y = distance.Y / time - 0.5f * gravity * time;
+            NPC.noTileCollide = true;
+            NPC.velocity = distance;
+            NPC.netUpdate = true;
         }
         else
         {
-            NPC.Center = Vector2.Lerp(NPC.Center, new Vector2(candle.Center.X, candle.Top.Y - (NPC.height) * scaleMult), 0.1f);
-            NPC.velocity = Vector2.Zero;
-            NPC.scale = scaleMult;
-            scaleMultMax = MathHelper.Lerp(1.5f, 2f, 0.02f);
+            NPC.noTileCollide = true;
+            NPC.velocity.Y += gravity;
+        }
+
+        aiTimer1++;
+        if (aiTimer1 > time)
+        {
+            NPC.velocity.X *= 0.9f;
+            NPC.velocity.Y += gravity;
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+            }
+            aiTimer1 = 0f;
+            aiTimer0 = 0;
+            aiTimer2 = 0;
+            NPC.netUpdate = true;
         }
     }
-
     public void WispPop(Player player)
     {
         float morphTime = 300;
@@ -645,7 +750,7 @@ public class MotherWisp : ModNPC
                 {
                     faceFrameCurrent = faceStartPop;
                 }
-                if (faceFrameCurrent < faceFrameTotal)
+                if (faceFrameCurrent < faceFrameTotal - 1)
                 {
                     if (NPC.frameCounter++ >= 10)
                     {

@@ -133,6 +133,12 @@ public class WispCandle : ModNPC
                     AITimer = 0;
                     AI_State = ActionState.Detaching;
                 }
+                else if (NPC.ai[1] == 3)
+                {
+                    NPC.localAI[0] = 0;
+                    AITimer = 0;
+                    AI_State = ActionState.Death;
+                }
                 else
                 {
                     NPC.velocity.X *= 0.8f;
@@ -160,6 +166,20 @@ public class WispCandle : ModNPC
                 if (AITimer ++ >= 120)
                 {
                     ExecuteCrazyMode(Main.player[(int)(NPC.ai[2])]);
+                }
+                break;
+            case ActionState.Death:
+                if (AITimer++ >= 120)
+                {
+                    NPC.active = false;
+                }
+                else
+                {
+                    float maxScale = AITimer / 30;
+                    if (Main.rand.NextBool(1))
+                    {
+                        emitter?.Emit(NPC.Top - new Vector2(0, 10), (-Vector2.UnitY * Main.rand.NextFloat(2, 4) * maxScale).RotatedByRandom(MathHelper.ToRadians(60 * maxScale)), 0f, 20);
+                    }
                 }
                 break;
         }

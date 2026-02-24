@@ -12,11 +12,11 @@ using Terraria.ModLoader;
 
 namespace ITD.Content.Projectiles.Hostile.MotherWisp;
 
-public class WispTelegraph : ModProjectile
+public class WispTelegraph2 : ModProjectile
 {
+    public override string Texture => "ITD/Content/Projectiles/Hostile/MotherWisp/WispTelegraph";
     public override void SetStaticDefaults()
     {
-        // DisplayName.SetDefault("Glow Line");
         ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 5000;
     }
 
@@ -64,6 +64,7 @@ public class WispTelegraph : ModProjectile
     private int drawLayers = 1;
     public override void OnSpawn(IEntitySource source)
     {
+        Main.NewText(maxTime);
         base.OnSpawn(source);
     }
     public override void AI()
@@ -87,25 +88,15 @@ public class WispTelegraph : ModProjectile
             return;
         }
 
-        if (alphaModifier >= 0)
-        {
-            Projectile.alpha = 255 - (int)(255 * Math.Sin(Math.PI / maxTime * aiTimer) * alphaModifier);
-            if (Projectile.alpha < 0)
+
                 Projectile.alpha = 0;
-        }
+        
 
         color.A = 0;
     }
 
     public override void OnKill(int timeLeft)
     {
-        if (Main.netMode != NetmodeID.MultiplayerClient)
-        {
-            int damage = (int)(Projectile.damage * 0.75f);
-            int knockBack = 3;
-            Projectile rain = Projectile.NewProjectileDirect(Projectile.GetSource_Death(), Projectile.Center, Vector2.UnitY * 12, ModContent.ProjectileType<WispFireRain>(), damage, knockBack, Main.myPlayer, 1,rayPosY);
-            rain.timeLeft = 300;
-        }
         base.OnKill(timeLeft);
     }
 
