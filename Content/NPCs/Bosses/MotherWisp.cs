@@ -11,6 +11,8 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using static ITD.Utilities.MiscHelpers;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace ITD.Content.NPCs.Bosses;
 
 [AutoloadBossHead]
@@ -156,6 +158,11 @@ public class MotherWisp : ModNPC
                     break;
                 FlyingSlam(player);
                     break;
+            case ActionState.FireSpin:
+                if (Phase <= 0)
+                    break;
+                FireWeb(player);
+                break;
             case ActionState.ToTarget:
                 if (P2Check())
                     break;
@@ -490,6 +497,12 @@ public class MotherWisp : ModNPC
 
         if (aiTimer0 >= slamTime)
         {
+            if (attackCount >= 5)
+            {
+                GetNextAttack(player, ActionState.FireSpin);
+                ResetStats();
+                return;
+            }
             DoSlam(player);
             // GetNextAttack(player, ActionState.FireRing);
             NPC.netUpdate = true;
@@ -515,27 +528,71 @@ public class MotherWisp : ModNPC
             }
         }
     }
+
+    Vector2 ringCenter = Vector2.Zero;
+    public void FireWeb(Player player)
+    {
+        NPC.scale = scaleMult;
+        aiTimer0++;
+        if (aiTimer0 == 60)
+        {
+            ringCenter = player.Center + new Vector2(
+                Main.rand.Next(-400,400),
+                Main.rand.Next(-500, -300));
+        }
+        if (aiTimer0 >= 120)
+        {
+            aiTimer1 += ((float)Math.PI / 20) * (attackCount % 2 == 0 ? 1 : -1);
+            if (aiTimer2++ >= 80)
+            {
+                for (int i = 0; i <= 10; i++)
+                {
+                    Projectile rain = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(),
+        ringCenter + new Vector2(50 * (attackCount % 2 == 0 ? -1 : 1)).RotatedBy(i * 40),
+        (-Vector2.UnitY * (attackCount % 2 == 0 ? 1 : -1)).RotatedBy(i * 40),
+        ModContent.ProjectileType<WispTelegraph2>(), 10, 0, -1);
+                }
+                attackCount++;
+                aiTimer0 = 0;
+                aiTimer1 = 0;
+                aiTimer2 = 0;
+            }
+        }
+        if (attackCount >= 2)
+        {
+            GetNextAttack(player, ActionState.FlySlam);
+            ResetStats();
+        }
+        NPC.Center = ringCenter + new Vector2(100).RotatedBy(aiTimer1);
+
+    }
     public void ResetStats()
     {
         aiTimer0 = 0;
         aiTimer1 = 0;
+        aiTimer2 = 0;
         attackCount = 0;
     }
 
     private void GetNextAttack(Player player, ActionState nextState)
     {
         float distance = Vector2.Distance(player.Center, NPC.Center);
-
-        if (distance > maxDist)
+        if (Phase <= 0)
         {
-            AI_State = ActionState.ToTarget;
-            CurrentAttack = (float)nextState;
+            if (distance > maxDist)
+            {
+                AI_State = ActionState.ToTarget;
+                CurrentAttack = (float)nextState;
+            }
+            else
+            {
+                AI_State = nextState;
+            }
         }
         else
         {
             AI_State = nextState;
         }
-
         ResetStats();
         NPC.netUpdate = true;
     }
@@ -581,7 +638,7 @@ public class MotherWisp : ModNPC
             Phase = 1;
             NPC.dontTakeDamage = false;
             ResetStats();
-            AI_State = ActionState.FlySlam;
+            AI_State = ActionState.FireSpin;
             NPC.netUpdate = true;
         }
     }
@@ -623,6 +680,7 @@ public class MotherWisp : ModNPC
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
             }
+            attackCount++;
             aiTimer1 = 0f;
             aiTimer0 = 0;
             aiTimer2 = 0;

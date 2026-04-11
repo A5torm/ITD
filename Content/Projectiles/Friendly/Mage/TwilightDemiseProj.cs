@@ -193,7 +193,8 @@ public class TwilightDemiseProj : ITDProjectile
             Projectile.ai[2]++;
             innerScale *= 0.99f - Projectile.ai[2] / 50;
         }
-        emitter?.InjectDrawAction(ParticleEmitterDrawStep.BeforePreDrawAll, () => Main.EntitySpriteDraw(texture2, Projectile.Center - Main.screenPosition, frame2, new Color(122, 0, 208, 0), Projectile.rotation, new Vector2(texture2.Width * 0.5f, texture2.Height / Main.projFrames[Type] * 0.5f), innerScale * Projectile.scale * 0.6f, SpriteEffects.None, 0f));
+        emitter?.InjectDrawAction(ParticleEmitterDrawStep.BeforePreDrawAll, () => 
+        Main.EntitySpriteDraw(texture2, Projectile.Center - Main.screenPosition, frame2, new Color(122, 0, 208, 0), Projectile.rotation, new Vector2(texture2.Width * 0.5f, texture2.Height / Main.projFrames[Type] * 0.5f), innerScale * Projectile.scale * 0.6f, SpriteEffects.None, 0f));
 
         emitter?.InjectDrawAction(ParticleEmitterDrawStep.BeforePreDrawAll, () => DrawAtProj(outline));
         if (Projectile.timeLeft >= 5)

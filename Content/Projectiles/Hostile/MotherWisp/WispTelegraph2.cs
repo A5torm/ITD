@@ -64,7 +64,6 @@ public class WispTelegraph2 : ModProjectile
     private int drawLayers = 1;
     public override void OnSpawn(IEntitySource source)
     {
-        Main.NewText(maxTime);
         base.OnSpawn(source);
     }
     public override void AI()
@@ -80,16 +79,19 @@ public class WispTelegraph2 : ModProjectile
 
         Projectile.position -= Projectile.velocity;
         Projectile.rotation = Projectile.velocity.ToRotation();
-    
 
+        if (alphaModifier >= 0)
+        {
+            Projectile.alpha = 255 - (int)(255 * Math.Sin(Math.PI / maxTime * aiTimer) * alphaModifier);
+            if (Projectile.alpha < 0)
+                Projectile.alpha = 0;
+        }
         if (++aiTimer > maxTime)
         {
             Projectile.Kill();
             return;
         }
 
-
-                Projectile.alpha = 0;
         
 
         color.A = 0;
@@ -122,6 +124,8 @@ public class WispTelegraph2 : ModProjectile
     public override bool PreDraw(ref Color lightColor)
     {
         Texture2D texture2D13 = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
+        Texture2D textureTip = Mod.Assets.Request<Texture2D>("Content/Projectiles/Friendly/Mage/TwilightDemiseHorribleThing").Value;
+        Rectangle frame2 = textureTip.Frame(1, Main.projFrames[Type], 0, Projectile.frame);
         int num156 = texture2D13.Height / Main.projFrames[Projectile.type]; //ypos of lower right corner of sprite to draw
         int y3 = num156 * Projectile.frame; //ypos of upper left corner of sprite to draw
         Rectangle rectangle = new(0, y3, texture2D13.Width, num156);
@@ -136,7 +140,15 @@ public class WispTelegraph2 : ModProjectile
         Color drawColor = Projectile.GetAlpha(lightColor);
 
         for (int j = 0; j < drawLayers; j++)
+        {
             Main.EntitySpriteDraw(new DrawData(texture2D13, destination, new Rectangle?(rectangle), drawColor, Projectile.rotation, origin2, SpriteEffects.None, 0));
+        }
+        Main.EntitySpriteDraw(textureTip, Projectile.Center - Main.screenPosition, frame2,
+        drawColor * 2, Projectile.rotation,
+        new Vector2(textureTip.Width
+        * 0.5f, textureTip.Height / Main.projFrames[Type] * 0.5f),
+        Projectile.scale * 0.5f, SpriteEffects.None, 0f);
+
         return false;
     }
 }
