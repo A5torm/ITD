@@ -69,7 +69,7 @@ public class WispFireRain : ModProjectile
                 else
                 {
                     Projectile.hide = true;
-                    Projectile.velocity *= 0.9f;
+                    Projectile.velocity *= 0.5f;
                     Projectile.tileCollide = true;
                     for (int i = 0; i < 2; i++)
                     {
