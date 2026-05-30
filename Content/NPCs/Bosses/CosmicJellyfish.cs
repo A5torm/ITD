@@ -8,6 +8,7 @@ using ITD.Content.Items.Placeable.Furniture.Relics;
 using ITD.Content.Items.Placeable.Furniture.Trophies;
 using ITD.Content.Projectiles.Hostile;
 using ITD.Content.Projectiles.Hostile.CosJel;
+using ITD.Content.Projectiles.Hostile.MotherWisp;
 using ITD.Particles;
 using ITD.Particles.CosJel;
 using ITD.PrimitiveDrawing;
@@ -940,7 +941,7 @@ namespace ITD.Content.NPCs.Bosses;
 
         public void SetSpell(Player player)
         {
-            float maxAttackPhase = 4;
+            float maxAttackPhase = 3;
             ref float AttackPhase = ref AITimer2;
             distanceAbove = 350;
             AITimer1++;
@@ -965,7 +966,7 @@ namespace ITD.Content.NPCs.Bosses;
                         AttackPhase++;
                     }
                     break;
-                case 1:
+/*                case 1:
                     if (AITimer1 % 150 == 0)
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -988,8 +989,8 @@ namespace ITD.Content.NPCs.Bosses;
                         AITimer1 = 0;
                         AttackPhase++;
                     }
-                    break;
-                case 2:
+                    break;*/
+                case 1:
                     if (AITimer1 % 240 == 0)
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -1006,7 +1007,7 @@ namespace ITD.Content.NPCs.Bosses;
                         }
                     }
                     break;
-                case 3:
+                case 2:
                     break;
                 default:
                     goto case 0;
@@ -1077,7 +1078,12 @@ namespace ITD.Content.NPCs.Bosses;
                                     sword.rotation = vel.ToRotation();
                                     sword.netImportant = true;
                                     sword.netUpdate = true;
-                                }
+                                Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), eyePos + new Vector2(dist, 0).RotatedBy(rot),
+                                Vector2.Zero, ModContent.ProjectileType<CosmicTelegraph>(), 0, 0, -1, 0, 0, 40);
+                                proj1.velocity = -Vector2.UnitX.RotatedBy(rot);
+                                proj1.scale = 0.75f;
+                                proj1.netUpdate = true;
+                            }
 
                             }
                             for (int i = 0; i < 18; i++)
@@ -1132,11 +1138,17 @@ namespace ITD.Content.NPCs.Bosses;
                                         Vector2.Zero, ModContent.ProjectileType<CosmicSwordStar>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 1f, -1, NPC.whoAmI, 0, 1);
                                     sword.rotation = vel.ToRotation();
                                     sword.netUpdate = true;
-                                }
+                                Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), eyePos + new Vector2(dist, 0).RotatedBy(rot),
+                                Vector2.Zero, ModContent.ProjectileType<CosmicTelegraph>(), 0, 0, -1, 0, 0, 40);
+                                proj1.velocity = -Vector2.UnitX.RotatedBy(rot);
+                                proj1.scale = 0.75f;
+                                proj1.netUpdate = true;
+                            }
                             }
 
                             for (int i = 0; i < 18; i++)
                             {
+                            
                                 int dust = Dust.NewDust(eyePos, 0, 0, ModContent.DustType<CosJelDust>(), 0, 0, 0, default, Main.rand.NextFloat(1.25f, 2.5f));
                                 Main.dust[dust].noGravity = true;
                                 Main.dust[dust].velocity = Vector2.UnitX.RotatedByRandom(Math.PI) * Main.rand.NextFloat(0.9f, 1.1f) * 12;
@@ -1267,7 +1279,6 @@ namespace ITD.Content.NPCs.Bosses;
                 case MovementState.Slamdown:
                     //This scan for floor, then do collision, inconsistent sometimes
                     RaycastData data = Helpers.QuickRaycast(NPC.Center, NPC.velocity, (point) => { return (player.Bottom.Y >= point.ToWorldCoordinates().Y + 20); }, 120);
-
                     if (AITimer2 <= 0)
                     {
                         if (NPC.Center.Distance(data.End) >= 20)
@@ -1374,12 +1385,14 @@ namespace ITD.Content.NPCs.Bosses;
 
                     if (AITimer1 <= 10)
                     {
-                        dashPos = player.Center + new Vector2(0, 0);
-
-                        NPC.velocity *= 0.95f;
+                    dashPos = player.Center + new Vector2(0, 0);
+                    Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center,
+                    Vector2.Zero, ModContent.ProjectileType<CosmicTelegraph>(), 0, 0, -1, 0, 0, 60);
+                    proj1.velocity += Vector2.Normalize(new Vector2(dashPos.X, dashPos.Y) - new Vector2(NPC.Center.X, NPC.Center.Y));
+                    proj1.scale = 3f;
+                    NPC.velocity *= 0.95f;
                         NetSync();
-
-                    }
+                }
                     else
                     {
                         Dash(dashPos, 1, 28, 50, 60, 9);
@@ -1531,11 +1544,11 @@ namespace ITD.Content.NPCs.Bosses;
                 case 9:
                     if (DashTimer == 1)
                     {
-                        AIRand = 38;//not using rand is better?
+                    AIRand = 38;//not using rand is better?
                     }
-                    if (DashTimer == time1 + 1 || DashTimer == AIRand - 2)
+                if (DashTimer == time1 + 1 || DashTimer == AIRand - 2)
                     {
-                        int ring = 128 - (int)(DashTimer * 2);
+                    int ring = 128 - (int)(DashTimer * 2);
                         for (int index1 = 0; index1 < ring; ++index1)
                         {
                             Vector2 vector2 = (-Vector2.UnitY.RotatedBy(index1 * 3.14159274101257 * 2 / ring) * new Vector2(8f, 16f)).RotatedBy(NPC.velocity.ToRotation());
@@ -1551,28 +1564,26 @@ namespace ITD.Content.NPCs.Bosses;
                     {
                         shouldBlank = true;
                     }
-                    if (DashTimer % 1 == 0 && DashTimer > time1 + 20 && DashTimer < reset)
+                if (DashTimer % 1 == 0 && DashTimer > time1 + 20 && DashTimer < reset)
+                {
+                    if (shouldBlank && blankCount++ <= 2)
                     {
-                        if (shouldBlank && blankCount++ <= 2)
+                    }
+                    else
+                    {
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                        }
-                        else
-                        {
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Vector2 vel1 = Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2);
-                                Vector2 vel2 = Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2);
-                                Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel1.ToRotation(), 0, 15);
-                                Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel2.ToRotation(), 0, 15);
-                                proj1.tileCollide = false;
-                                proj2.tileCollide = false;
-                                proj1.rotation = vel1.ToRotation();
-                                proj2.rotation = vel2.ToRotation();
-                            }
+                            Vector2 vel1 = Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2);
+                            Vector2 vel2 = Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2);
+                            Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel1.ToRotation(), 0, 15);
+                            Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel2.ToRotation(), 0, 15);
+                            proj1.tileCollide = false;
+                            proj2.tileCollide = false;
+                            proj1.rotation = vel1.ToRotation();
+                            proj2.rotation = vel2.ToRotation();
                         }
                     }
-
-            
+                }
                     break;
             }
             NPC.netUpdate = true;

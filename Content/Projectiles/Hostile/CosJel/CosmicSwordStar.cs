@@ -2,11 +2,13 @@
 using ITD.Content.Dusts;
 using ITD.Content.NPCs.Bosses;
 using ITD.Content.Projectiles.Friendly.Melee;
+using ITD.Content.Projectiles.Hostile.MotherWisp;
 using ITD.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -54,20 +56,6 @@ public class CosmicSwordStar : ModProjectile
             Projectile.active = false;
             return;
         }
-        if (!RoundTrip)
-            {
-                Vector2 eyePos = CosJel.Center + new Vector2(0, -60); 
-                Vector2 magVec = eyePos - Projectile.Center;
-                magVec.Along(Projectile.Center, 10, v =>
-                {
-                    for (int i = 0; i <= 1; i++)
-                    {
-                        Dust dust = Dust.NewDustPerfect(new Vector2(v.X, v.Y), ModContent.DustType<CosJelDust>(), Vector2.Zero,0,Scale:2);
-                        dust.scale = 1.75f;
-                        dust.noGravity = true;
-                    }
-                });
-            }
         for (int i = 0; i < 20; i++)
         {
             int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, ModContent.DustType<CosJelDust>(), 0, 0, 0, default, 2f);
@@ -118,9 +106,9 @@ public class CosmicSwordStar : ModProjectile
             if (Projectile.localAI[0]++ == 80)
             {
                 SoundEngine.PlaySound(SoundID.Item20, eyePos);
-
                 Projectile.velocity = -Vector2.Normalize(eyePos - Projectile.Center) * 30;
                 Projectile.rotation = Projectile.velocity.ToRotation();
+
             }
         }
         else

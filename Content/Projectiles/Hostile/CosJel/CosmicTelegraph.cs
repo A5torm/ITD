@@ -10,9 +10,9 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ITD.Content.Projectiles.Hostile.MotherWisp;
+namespace ITD.Content.Projectiles.Hostile.CosJel;
 
-public class WispTelegraph2 : ModProjectile
+public class CosmicTelegraph : ModProjectile
 {
     public override string Texture => "ITD/Content/Projectiles/Hostile/MotherWisp/WispTelegraph";
     public override void SetStaticDefaults()
@@ -51,6 +51,11 @@ public class WispTelegraph2 : ModProjectile
         get => Projectile.ai[0];
         set => Projectile.ai[0] = value;
     }
+    private float rayPosY//be accurate
+    {
+        get => Projectile.ai[1];
+        set => Projectile.ai[1] = value;
+    }
     private float maxTime//be accurate
     {
         get => Projectile.ai[2] == 0f ? 60f : Projectile.ai[2];
@@ -65,10 +70,8 @@ public class WispTelegraph2 : ModProjectile
     {
         float alphaModifier = 3;
 
-        color = new Color(93, 255, 241, 0) * 0.75f;
+        color = new Color(255, 255, 255, 0) * 0.75f;
         alphaModifier = 1;
-        Projectile.scale = 1f;
-
         if (aiTimer < maxTime / 2)
             aiTimer = maxTime / 2;
 
@@ -87,7 +90,7 @@ public class WispTelegraph2 : ModProjectile
             return;
         }
 
-        
+
 
         color.A = 0;
     }
@@ -122,14 +125,14 @@ public class WispTelegraph2 : ModProjectile
         Texture2D textureTip = Mod.Assets.Request<Texture2D>("Content/Projectiles/Friendly/Mage/TwilightDemiseHorribleThing").Value;
         Rectangle frame2 = textureTip.Frame(1, Main.projFrames[Type], 0, Projectile.frame);
         int num156 = texture2D13.Height / Main.projFrames[Projectile.type];
-        int y3 = num156 * Projectile.frame; //ypos of upper left corner of sprite to draw
+        int y3 = num156 * Projectile.frame;
         Rectangle rectangle = new(0, y3, texture2D13.Width, num156);
         Vector2 origin2 = rectangle.Size() / 2f;
 
-        int length = 3000;
+        int length = rayPosY == 0 ? 3000 : (int)((Math.Abs(rayPosY - Projectile.Center.Y)));
         Vector2 offset = Projectile.rotation.ToRotationVector2() * length / 2f;
         Vector2 position = Projectile.Center - Main.screenLastPosition + new Vector2(0f, Projectile.gfxOffY) + offset;
-        const float resolutionCompensation = 128f / 24f; //i made the image higher res, this compensates to keep original display size
+        const float resolutionCompensation = 128f / 24f;
         Rectangle destination = new((int)position.X, (int)position.Y, length, (int)(rectangle.Height * Projectile.scale / resolutionCompensation));
 
         Color drawColor = Projectile.GetAlpha(lightColor);
