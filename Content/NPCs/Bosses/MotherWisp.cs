@@ -104,6 +104,7 @@ public class MotherWisp : ModNPC
     public int OwnerIndex => (int)NPC.ai[0];
     public override void AI()
     {
+        text(aiTimer0);
         NPC Candle = MiscHelpers.NPCExists(OwnerIndex, ModContent.NPCType<WispCandle>());
         if (NPC.target < 0 || NPC.target == 255 || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
         {
@@ -560,8 +561,8 @@ public class MotherWisp : ModNPC
         }
         if (attackCount >= 2)
         {
-            GetNextAttack(player, ActionState.FlySlam);
             ResetStats();
+            GetNextAttack(player, ActionState.FlySlam);
         }
         NPC.Center = ringCenter + new Vector2(100).RotatedBy(aiTimer1);
 
