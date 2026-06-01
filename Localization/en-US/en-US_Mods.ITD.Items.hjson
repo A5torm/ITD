@@ -1558,3 +1558,8 @@ ElectrumPickaxe: {
 	DisplayName: Electrum Pickaxe
 	Tooltip: ""
 }
+
+FungalBow: {
+	DisplayName: Fungal Bow
+	Tooltip: ""
+}

@@ -278,6 +278,7 @@ Projectiles: {
 	// WispFireRain.DisplayName: Wisp Fire Rain
 	// WispTelegraph2.DisplayName: Wisp Telegraph2
 	// CosmicTelegraph.DisplayName: Cosmic Telegraph
+	// ParasiteArrow.DisplayName: Parasite Arrow
 }
 
 NPCs: {
