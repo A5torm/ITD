@@ -7,7 +7,6 @@ namespace ITD.Content.Items.Accessories.Combat.All;
 
 public class OrionsRing : ModItem
 {
-    public override string Texture => Placeholder.PHAxe;
     public override void SetDefaults()
     {
         Item.width = 28;

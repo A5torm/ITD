@@ -1556,3 +1556,13 @@ FungalBow: {
 	// DisplayName: Fungal Bow
 	// Tooltip: ""
 }
+
+UndertakerShovel: {
+	// DisplayName: Undertaker Shovel
+	// Tooltip: ""
+}
+
+LavaGun: {
+	// DisplayName: Lava Gun
+	// Tooltip: ""
+}
