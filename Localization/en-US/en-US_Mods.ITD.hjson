@@ -279,6 +279,10 @@ Projectiles: {
 	WispTelegraph2.DisplayName: Wisp Telegraph2
 	CosmicTelegraph.DisplayName: Cosmic Telegraph
 	ParasiteArrow.DisplayName: Parasite Arrow
+	UndertakerProj.DisplayName: Undertaker Proj
+	UndertakerGhostProj.DisplayName: Undertaker Ghost Proj
+	UndertakerGhostBullet.DisplayName: Undertaker Ghost Bullet
+	LavaGunProj.DisplayName: Lava Gun Proj
 }
 
 NPCs: {

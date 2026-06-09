@@ -5,8 +5,6 @@ namespace ITD.Content.Items.Accessories.Combat.All;
 
 public class SoulTalisman : ModItem
 {
-    /*        public override string Texture => Placeholder.PHAxe;*/
-
     public override void SetStaticDefaults()
     {
         Item.ResearchUnlockCount = 1;
