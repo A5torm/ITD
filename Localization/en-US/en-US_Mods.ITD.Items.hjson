@@ -1571,9 +1571,19 @@ UndertakerShovel: {
 
 LavaGun: {
 	DisplayName: Lava Gun
-	Tooltip: 
+	Tooltip:
 		'''
 		Squirts a scorching stream of Lava
 		Best used for melting townsfolk
 		'''
+}
+
+HoneyGun: {
+	DisplayName: Honey Gun
+	Tooltip: ""
+}
+
+CosmicWaterGun: {
+	DisplayName: Cosmic Water Gun
+	Tooltip: ""
 }
