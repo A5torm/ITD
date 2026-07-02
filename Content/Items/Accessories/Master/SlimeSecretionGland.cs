@@ -40,12 +40,12 @@ public class KSGlandPlayer : ModPlayer
     {
         if (ksMasterAcc && (RegrowCD <= 0))
         {
-            if (!Player.isNearNPC(ModContent.NPCType<KSGlandNPC>()))
+            if (!Player.isNearNPC(ModContent.NPCType<SlimeCoating>()))
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
 
-                    NPC.NewNPCDirect(Player.GetSource_FromThis(), Player.Center, ModContent.NPCType<KSGlandNPC>(), 0, Player.whoAmI);
+                    NPC.NewNPCDirect(Player.GetSource_FromThis(), Player.Center, ModContent.NPCType<SlimeCoating>(), 0, Player.whoAmI);
                 }
             }
         }

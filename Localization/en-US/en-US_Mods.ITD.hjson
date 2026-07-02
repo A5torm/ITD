@@ -283,6 +283,8 @@ Projectiles: {
 	UndertakerGhostProj.DisplayName: Undertaker Ghost Proj
 	UndertakerGhostBullet.DisplayName: Undertaker Ghost Bullet
 	LavaGunProj.DisplayName: Lava Gun Proj
+	HoneyGunProj.DisplayName: Honey Gun Proj
+	CosmicWaterProj.DisplayName: Cosmic Water Proj
 }
 
 NPCs: {
@@ -389,6 +391,7 @@ NPCs: {
 	MotherWisp.DisplayName: Mother Wisp
 	WispCandle.DisplayName: Wisp Candle
 	GrandWisp.DisplayName: Grand Wisp
+	SlimeCoating.DisplayName: Slime Coating
 }
 
 Buffs: {

@@ -78,7 +78,7 @@ public class UndertakerGhostProj : ModProjectile
                 shootGlow = 1;
                 Projectile.netUpdate = true;
                 SoundEngine.PlaySound(SoundID.Item14, Projectile.position);
-                Vector2 vel  = Vector2.Normalize(Vector2.UnitX.RotatedBy(Projectile.rotation)) * -12 * Projectile.spriteDirection;
+                Vector2 vel  = Vector2.Normalize(Vector2.UnitX.RotatedBy(Projectile.rotation)) * -14 * Projectile.spriteDirection;
                 muzzleFlashPos = Projectile.Center + new Vector2(26 * -Projectile.spriteDirection, 6).RotatedBy(Projectile.rotation);
                 Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(),
                     Projectile.Center + new Vector2(10 * -Projectile.spriteDirection, 6).RotatedBy(Projectile.rotation),

@@ -23,7 +23,7 @@ public class UndertakerGhostBullet : ModProjectile
         Projectile.friendly = true;
         Projectile.hostile = false;
         Projectile.DamageType = DamageClass.Melee;
-        Projectile.noEnchantments = true;
+        Projectile.noEnchantmentVisuals = true;
         Projectile.penetrate = 1;
         Projectile.timeLeft = 40;
         Projectile.alpha = 0;
@@ -41,7 +41,7 @@ public class UndertakerGhostBullet : ModProjectile
     public override void AI()
     {
         Projectile.rotation = Projectile.velocity.ToRotation();
-        if (Projectile.timeLeft <= 20)
+        if (Projectile.timeLeft <= 15)
         {
             Projectile.velocity *= 0.8f;
             Projectile.alpha += 5;
