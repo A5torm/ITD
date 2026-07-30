@@ -21,16 +21,36 @@ public class CyaniteHood : ModItem
     }
     public override bool IsArmorSet(Item head, Item body, Item legs)
     {
-        return body.type == ModContent.ItemType<CyaniteGreaves>() && legs.type == ModContent.ItemType<CyanitePlating>();
+		return body.type == ModContent.ItemType<CyanitePlating>() && legs.type == ModContent.ItemType<CyaniteGreaves>();
     }
+	
     public override void UpdateEquip(Player player)
     {
         player.GetDamage(DamageClass.Magic) += 0.15f;
-        player.manaCost -= 0.15f;
     }
 
     public override void UpdateArmorSet(Player player)
     {
         player.setBonus = SetBonusText.Value;
+		player.manaCost -= 0.70f;
+		player.GetModPlayer<CyaniteHoodPlayer>().setBonus = true;
+    }
+}
+
+internal class CyaniteHoodPlayer : ModPlayer
+{
+    public bool setBonus;
+
+    public override void ResetEffects()
+    {
+        setBonus = false;
+    }
+
+    public override void OnHurt(Player.HurtInfo info)
+    {
+        if (setBonus)
+        {
+			Player.AddBuff(BuffID.Frostburn2, 480, false);
+		}
     }
 }

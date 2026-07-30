@@ -1,20 +1,16 @@
 ﻿using ITD.Systems;
-using ITD.Systems.DataStructures;
-using ITD.Systems.Extensions;
 using ITD.Utilities;
-using Terraria.Graphics;
-using Terraria.Graphics.Shaders;
+using ITD.Particles;
+using ITD.Particles.Misc;
 
 namespace ITD.Content.Projectiles.Friendly.Ranger;
 
 public class GhostbusterProj : ModProjectile
 {
-    public VertexStrip TrailStrip = new();
     public NPC TargetLock;
     public Vector2 VacuumCleaner;
-
-    public ref float FadeIn => ref Projectile.ai[0];
-
+	public ParticleEmitter emitter;
+	
     public override void SetDefaults()
     {
         Projectile.DamageType = DamageClass.Ranged;
@@ -27,6 +23,9 @@ public class GhostbusterProj : ModProjectile
         Projectile.tileCollide = false;
         Projectile.usesLocalNPCImmunity = true;
         Projectile.localNPCHitCooldown = 10;
+		
+		emitter = ParticleSystem.NewEmitter<EctoCloud>(ParticleEmitterDrawCanvas.WorldOverProjectiles);
+        emitter.tag = Projectile;
     }
 
     public override bool? CanHitNPC(NPC target)
@@ -38,12 +37,11 @@ public class GhostbusterProj : ModProjectile
 
     public override void AI()
     {
+		if (emitter != null)
+            emitter.keptAlive = true;
         Player player = Main.player[Projectile.owner];
         ITDPlayer modPlayer = player.GetITDPlayer();
         Vector2 mouse = modPlayer.MousePosition;
-
-        if (FadeIn < 2f)
-            FadeIn += 0.1f;
 
         Projectile.timeLeft = 60;
 
@@ -89,82 +87,23 @@ public class GhostbusterProj : ModProjectile
         TargetLock = closestNPC;
 
         if (TargetLock != null)
+		{
             Projectile.Center = TargetLock.Center;
+			for (int j = 0; j < 3; j++)
+            {
+				Vector2 particlePosition = Projectile.Center + Main.rand.NextVector2Circular(32f, 32f);
+				Vector2 particleVelocity = (VacuumCleaner - particlePosition) * 0.08f;
+				emitter?.Emit(particlePosition, particleVelocity, 0f, 20);
+			}
+		}
         else
             Projectile.Center = VacuumCleaner;
 
         modPlayer.recoilFront = modPlayer.recoilBack = Main.rand.NextFloat(0.15f);
     }
-
-    private Color StripColorBlue(float progressOnStrip)
-    {
-        return new Color(200, 200, 255) * FadeIn;
-    }
-    private Color StripColorOrange(float progressOnStrip)
-    {
-        return new Color(255, 255, 200) * FadeIn;
-    }
-    private float StripWidth1(float progressOnStrip)
-    {
-        return 64f;
-    }
-    private static float StripWidth2(float progressOnStrip)
-    {
-        return 16f;
-    }
+	
     public override bool PreDraw(ref Color lightColor)
     {
-        if (TargetLock != null)
-        {
-            //float toTarget = (TargetLock.Center - Projectile.Center).ToRotation();
-
-            // you can increase this as much as you want
-            // a value this low looks weird in certain positions but that's why i'm limiting the midpoint's position
-            int res = 20;
-
-            // <>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            float yRange = 100f;
-            Vector2 mouse = Main.player[Projectile.owner].GetITDPlayer().MousePosition;
-            Vector2 realMidPoint = Vector2.Lerp(VacuumCleaner, TargetLock.Center, 0.5f);
-
-            // clamp to avoid long noodle
-            mouse.Y = MathHelper.Clamp(mouse.Y, VacuumCleaner.Y - yRange, TargetLock.Center.Y + yRange);
-            mouse.X = MathHelper.Clamp(mouse.X,
-                Projectile.direction == 1 ? VacuumCleaner.X : TargetLock.Center.X,
-                Projectile.direction == 1 ? TargetLock.Center.X : VacuumCleaner.X);
-
-            // lerp to avoid weird segments
-            float angleDiffRange = 0.5f;
-            float angleDiff = MiscHelpers.AngleDiff(VacuumCleaner, mouse, TargetLock.Center);
-            float lerp0 = MathHelper.Clamp(angleDiff / angleDiffRange, 0f, 1f);
-            mouse = Vector2.Lerp(mouse, realMidPoint, lerp0);
-
-            // lerp to avoid more weird segments
-            float closenessRange = 100f;
-            float lerp = MathHelper.Clamp(VacuumCleaner.DistanceSQ(TargetLock.Center) / (closenessRange * closenessRange), 0f, 1f);
-            mouse = Vector2.Lerp(mouse, realMidPoint, 1f - lerp);
-            // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</>
-
-            Vector2[] positions = Bezier.Quadratic(TargetLock.Center, mouse, VacuumCleaner, res);
-            float[] rotations = Bezier.Rotations(positions);
-
-            GameShaders.Misc["MagicMissile"].Apply(null);
-
-            TrailStrip.PrepareStrip(positions, rotations, StripColorBlue, StripWidth1, -Main.screenPosition, positions.Length, true);
-
-            TrailStrip.DrawTrail();
-
-            //MiscShaderData OrangeShader = GameShaders.Misc["FlameLash"];
-            //OrangeShader.UseSaturation(-2f);
-            //OrangeShader.UseOpacity(4f);
-            //OrangeShader.Apply(null);
-
-            //TrailStrip.PrepareStrip(positions, rotations, StripColorOrange, StripWidth2, - Main.screenPosition, positions.Length, true);
-            //TrailStrip.DrawTrail();
-
-            Main.spriteBatch.End(out SpriteBatchData spriteBatchData); // unapply shaders
-            Main.spriteBatch.Begin(spriteBatchData);
-        }
         return false;
     }
 }

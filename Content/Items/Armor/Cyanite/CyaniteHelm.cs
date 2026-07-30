@@ -1,4 +1,5 @@
 ﻿using Terraria.Localization;
+using ITD.Content.Projectiles.Friendly.Misc;
 
 namespace ITD.Content.Items.Armor.Cyanite;
 
@@ -21,7 +22,7 @@ public class CyaniteHelm : ModItem
     }
     public override bool IsArmorSet(Item head, Item body, Item legs)
     {
-        return body.type == ModContent.ItemType<CyaniteGreaves>() && legs.type == ModContent.ItemType<CyanitePlating>();
+        return body.type == ModContent.ItemType<CyanitePlating>() && legs.type == ModContent.ItemType<CyaniteGreaves>();
     }
 
     public override void UpdateEquip(Player player)
@@ -33,5 +34,28 @@ public class CyaniteHelm : ModItem
     public override void UpdateArmorSet(Player player)
     {
         player.setBonus = SetBonusText.Value;
+		player.GetModPlayer<CyaniteHelmPlayer>().setBonus = true;
+    }
+}
+
+internal class CyaniteHelmPlayer : ModPlayer
+{
+    public bool setBonus;
+
+    public override void ResetEffects()
+    {
+        setBonus = false;
+    }
+
+    public override void OnHurt(Player.HurtInfo info)
+    {
+        if (setBonus)
+        {
+			for (int i = 0; i < 8; i++)
+			{
+				Vector2 direction = Vector2.UnitX.RotatedBy(MathHelper.PiOver4 * i);
+				Projectile.NewProjectile(Player.GetSource_FromThis(), Player.Center + direction * (32f), direction, ModContent.ProjectileType<CyaniteSpike>(), info.SourceDamage * 5, 0.25f, Player.whoAmI, 0f, 1f, 0f);
+			}
+		}
     }
 }

@@ -285,6 +285,7 @@ Projectiles: {
 	LavaGunProj.DisplayName: Lava Gun Proj
 	HoneyGunProj.DisplayName: Honey Gun Proj
 	CosmicWaterProj.DisplayName: Cosmic Water Proj
+	GhostbusterProjOld.DisplayName: Ghostbuster Proj Old
 }
 
 NPCs: {

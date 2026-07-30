@@ -735,19 +735,19 @@ BloodPact: {
 }
 
 CyaniteHelm: {
-	// SetBonus: Mods.ITD.Items.CyaniteHelm.SetBonus
+	// SetBonus: Release a ring of cyanite thorns when hit
 	// DisplayName: Cyanite Helm
 	// Tooltip: ""
 }
 
 CyaniteHood: {
-	// SetBonus: Mods.ITD.Items.CyaniteHood.SetBonus
+	// SetBonus: 70% reduced mana costs but become frostbitten when hit
 	// DisplayName: Cyanite Hood
 	// Tooltip: ""
 }
 
 CyaniteMask: {
-	// SetBonus: Mods.ITD.Items.CyaniteMask.SetBonus
+	// SetBonus: Cyanite bullets and arrows are more powerful
 	// DisplayName: Cyanite Mask
 	// Tooltip: ""
 }

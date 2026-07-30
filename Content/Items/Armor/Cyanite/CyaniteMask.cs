@@ -21,7 +21,7 @@ public class CyaniteMask : ModItem
     }
     public override bool IsArmorSet(Item head, Item body, Item legs)
     {
-        return body.type == ModContent.ItemType<CyaniteGreaves>() && legs.type == ModContent.ItemType<CyanitePlating>();
+        return body.type == ModContent.ItemType<CyanitePlating>() && legs.type == ModContent.ItemType<CyaniteGreaves>();
     }
 
     public override void UpdateEquip(Player player)
@@ -33,5 +33,16 @@ public class CyaniteMask : ModItem
     public override void UpdateArmorSet(Player player)
     {
         player.setBonus = SetBonusText.Value;
+		player.GetModPlayer<CyaniteMaskPlayer>().setBonus = true;
+    }
+}
+
+internal class CyaniteMaskPlayer : ModPlayer
+{
+    public bool setBonus;
+	
+	public override void ResetEffects()
+    {
+        setBonus = false;
     }
 }
