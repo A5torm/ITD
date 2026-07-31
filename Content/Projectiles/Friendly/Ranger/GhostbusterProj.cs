@@ -92,13 +92,22 @@ public class GhostbusterProj : ModProjectile
 			for (int j = 0; j < 3; j++)
             {
 				Vector2 particlePosition = Projectile.Center + Main.rand.NextVector2Circular(32f, 32f);
-				Vector2 particleVelocity = (VacuumCleaner - particlePosition) * 0.08f;
-				emitter?.Emit(particlePosition, particleVelocity, 0f, 20);
+				emitter?.Emit(particlePosition, new Vector2(), 0f, 20);
 			}
 		}
         else
             Projectile.Center = VacuumCleaner;
-
+	
+		if (emitter != null)
+		{
+			for (int i = emitter.particles.Count - 1; i >= 0; i--)
+			{
+				ITDParticle particle = emitter.particles[i];
+				particle.velocity = Vector2.Normalize(VacuumCleaner - particle.position) * 12f;
+				emitter.particles[i] = particle;
+			}
+		}
+		
         modPlayer.recoilFront = modPlayer.recoilBack = Main.rand.NextFloat(0.15f);
     }
 	

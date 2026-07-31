@@ -3,6 +3,7 @@ using ITD.Content.Items.Other;
 using ITD.Content.Items.Weapons.Mage;
 using ITD.Content.Items.Weapons.Melee;
 using ITD.Content.Items.Weapons.Summoner;
+using ITD.Content.Items.Weapons.Ranger;
 using ITD.Content.Projectiles.Hostile.Gravekeeper;
 using ITD.ItemDropRules.Conditions;
 using ITD.Utilities;
@@ -22,6 +23,7 @@ public class Gravekeeper : ModNPC
         ModContent.ItemType<Ectoblade>(),
         ModContent.ItemType<Necromatome>(),
         ModContent.ItemType<KeepersShovel>(),
+		ModContent.ItemType<Ghostbuster>(),
     ];
 
     private enum ActionState
