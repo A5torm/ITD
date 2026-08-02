@@ -50,13 +50,4 @@ public class CosmicWaterGun : ModItem
         Projectile.NewProjectileDirect(source, position, newVelocity, ModContent.ProjectileType<CosmicWaterProj>(), damage, knockback, player.whoAmI);
         return false;
     }
-
-    public override void AddRecipes()
-    {
-        Recipe recipe = CreateRecipe();
-        recipe.AddIngredient(ItemID.LavaBucket, 1);
-        recipe.AddIngredient(ItemID.Obsidian, 10);
-        recipe.AddTile(TileID.Anvils);
-        recipe.Register();
-    }
 }

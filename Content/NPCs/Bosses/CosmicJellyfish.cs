@@ -510,8 +510,8 @@ namespace ITD.Content.NPCs.Bosses;
             distanceAbove = 350;
             AITimer1++;
             float maxAttackCount = 3;
-            float restTime = masterMode ? 250 : expertMode ? 280 : 300;
-            if ((AITimer1 >= 120 && AttackCount <= 0) || AITimer1 >= restTime)
+            float restTime = masterMode ? 240 : expertMode ? 280 : 300;
+            if ((AITimer1 >= 150 && AttackCount <= 0) || AITimer1 >= restTime)
             {
                 if (AttackCount < maxAttackCount)
                 {
@@ -587,8 +587,8 @@ namespace ITD.Content.NPCs.Bosses;
                         dist = 400 - AttackCount * 30;
                     }
                     if (AttackCount == finalAttack - 1 && bSecondStage)
-                        dist = masterMode ? 450 : expertMode ? 500 : 600;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        dist = masterMode ? 500 : expertMode ? 600 : 650; // you are bad at the game
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         for (int i = 0; i <= 1; i++)
                         {
@@ -1018,7 +1018,7 @@ namespace ITD.Content.NPCs.Bosses;
                 AI_State = MovementState.FollowingRegular;
                 AttackID = GetNextAttack();
                 ResetStats();
-                AITimer1 = -300;
+                AITimer1 = -400;
             }
             void spawnHand(int dir = -1)
             {
@@ -1026,12 +1026,12 @@ namespace ITD.Content.NPCs.Bosses;
                     player.Center - new Vector2((Main.screenWidth / 2) * dir, 0), Vector2.Zero,
                     ModContent.ProjectileType<CosmicFistSetGrab>(), 0, 0, -1, NPC.whoAmI, dir);
             }
-            void spawnPunch(float attackTimer,int dir = -1)
+/*            void spawnPunch(float attackTimer,int dir = -1)
             {
                 Projectile hand = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(),
                     player.Center - new Vector2((Main.screenWidth / 2) * dir, 0), Vector2.Zero,
                     ModContent.ProjectileType<CosmicFistSetPunch>(), ProjectileDamage(NPC.damage), 2, -1, NPC.whoAmI, dir,attackTimer);
-            }
+            }*/
         }
 
         public void P2Transition(Player player)
@@ -1509,30 +1509,33 @@ namespace ITD.Content.NPCs.Bosses;
                             Main.dust[index2].velocity += vector2 * 1f * (reset - DashTimer) / reset + NPC.velocity * 0.5f;
                         }
                     }
-                    if (DashTimer % 10 == 0 && DashTimer > time1 && DashTimer < reset)
+                if (DashTimer % 10 == 0 && DashTimer > time1 && DashTimer < reset)
+                {
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        Vector2 vel1 = !bSecondStage ? Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2) : Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2 + MathHelper.Pi / 6) * 1.25f;
+                        Vector2 vel2 = !bSecondStage ? Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2) : Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2 - MathHelper.Pi / 6) * 1.25f;
+                        Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
+                        Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
+                        proj1.tileCollide = false;
+                        proj1.timeLeft = 300;
+                        proj2.tileCollide = false;
+                        proj2.timeLeft = 300;
+
+                    }
+                    if (expertMode || masterMode)
+                    {
+                        if (bSecondStage)
                         {
-                            Vector2 vel1 = !bSecondStage ? Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2) : Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2 + MathHelper.Pi / 6) * 1.25f;
-                            Vector2 vel2 = !bSecondStage ? Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2) : Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2 - MathHelper.Pi / 6) * 1.25f;
-                            Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
-                            Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
-                            proj1.tileCollide = false;
-                            proj2.tileCollide = false;
-                        }
-                        if (expertMode || masterMode)
-                        {
-                            if (bSecondStage)
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                if (Main.netMode != NetmodeID.MultiplayerClient)
-                                {
-                                    Projectile proj3 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, -Vector2.Normalize(NPC.velocity), ModContent.ProjectileType<CosmicWave>(), ProjectileDamage(NPC.damage), 0, -1);
-                                    proj3.tileCollide = false;
-                                }
+                                Projectile proj3 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, -Vector2.Normalize(NPC.velocity), ModContent.ProjectileType<CosmicWave>(), ProjectileDamage(NPC.damage), 0, -1);
+                                proj3.tileCollide = false;
                             }
                         }
                     }
-                    break;
+                }
+                break;
                 case 2:
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
@@ -1544,7 +1547,7 @@ namespace ITD.Content.NPCs.Bosses;
                 case 9:
                     if (DashTimer == 1)
                     {
-                    AIRand = 38;//not using rand is better?
+                    AIRand = 35;//not using rand is better?
                     }
                 if (DashTimer == time1 + 1 || DashTimer == AIRand - 2)
                     {

@@ -45,7 +45,7 @@ public class Flamgoustine : ITDNPC
         NPC.spriteDirection = NPC.direction;
         if (AIState != ActionState.StoppingSpin)
             AITimer++;
-        if (AITimer > AIRand)
+        if (AITimer > AIRand || AITimer > 70 && AIState != ActionState.ChargingSpin)
         {
             AIState++;
             AITimer = 0;

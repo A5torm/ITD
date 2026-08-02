@@ -54,8 +54,8 @@ public class HoneyGun : ModItem
     public override void AddRecipes()
     {
         Recipe recipe = CreateRecipe();
-        recipe.AddIngredient(ItemID.LavaBucket, 1);
-        recipe.AddIngredient(ItemID.Obsidian, 10);
+        recipe.AddIngredient(ItemID.HoneyBucket, 1);
+        recipe.AddIngredient(ItemID.BeeWax, 6);
         recipe.AddTile(TileID.Anvils);
         recipe.Register();
     }
