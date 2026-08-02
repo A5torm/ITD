@@ -136,13 +136,13 @@ public class BleedbreakerSwing : ModProjectile
                 Projectile.Resize((int)(50 * Projectile.scale), (int)(110 * Projectile.scale));
                 break;
             case 2:
-                Projectile.Resize((int)(300 * Projectile.scale), (int)(200 * Projectile.scale));
+                Projectile.Resize((int)(200 * Projectile.scale), (int)(200 * Projectile.scale));
                 break;
             case 3:
-                Projectile.Resize((int)(260 * Projectile.scale), (int)(180 * Projectile.scale));
+                Projectile.Resize((int)(200 * Projectile.scale), (int)(180 * Projectile.scale));
                 break;
             case 4:
-                Projectile.Resize((int)(220 * Projectile.scale), (int)(150 * Projectile.scale));
+                Projectile.Resize((int)(180 * Projectile.scale), (int)(150 * Projectile.scale));
                 break;
             case 5:
                 Projectile.Resize((int)(180 * Projectile.scale), (int)(100 * Projectile.scale));
@@ -151,7 +151,7 @@ public class BleedbreakerSwing : ModProjectile
         player.heldProj = Projectile.whoAmI;
         if (!player.channel)
         {
-            if (Projectile.frameCounter >= 8)
+            if (Projectile.frameCounter >= 6)
             {
                 Projectile.frameCounter = 0;
                 Projectile.frame++;
@@ -162,7 +162,7 @@ public class BleedbreakerSwing : ModProjectile
                 }
             }
             if (angle <= MathHelper.Pi * 1.25f)
-                angle += 0.2f;
+                angle += 0.3f;
             player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full,
                     (MathHelper.Pi + angle) * player.direction);
         }

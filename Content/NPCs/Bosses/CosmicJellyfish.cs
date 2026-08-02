@@ -456,6 +456,7 @@ namespace ITD.Content.NPCs.Bosses;
             }
             if (AttackCount > 0)//doesn't loop
             {
+            //warp1
                 AI_State = MovementState.FollowingRegular;
                 AttackID = GetNextAttack();
                 ResetStats();
@@ -704,7 +705,7 @@ namespace ITD.Content.NPCs.Bosses;
                         }
                     }
                 }
-                if (AITimer1 >= 400 + sweepTime)//loop
+                if (AITimer1 >= 450 + sweepTime)//loop
                 {
                     AI_State = MovementState.FollowingRegular;
                     AttackID = GetNextAttack();
@@ -720,7 +721,7 @@ namespace ITD.Content.NPCs.Bosses;
             AITimer1++;
             distanceAbove = 300;
             int maxAttackCount = masterMode ? 3 : expertMode ? 4 : 5;//less attack means faster cycle
-            float restTime = masterMode ? 240 : expertMode ? 320 : 450;
+            float restTime = masterMode ? 280 : expertMode ? 350 : 450;
             if (AttackCount < maxAttackCount)
             {
                 if (AITimer1 >= 90 && AttackCount <= 0 || AITimer1 >= restTime)
@@ -945,10 +946,13 @@ namespace ITD.Content.NPCs.Bosses;
             ref float AttackPhase = ref AITimer2;
             distanceAbove = 350;
             AITimer1++;
-            
-            switch (AttackPhase)
-            {
-                case 0://wall spam
+
+        switch (AttackPhase)
+        {
+            case 0://wall spam
+                if (AITimer1 > 0)
+                {
+
                     if (AITimer1 % 120 == 0)
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -959,13 +963,15 @@ namespace ITD.Content.NPCs.Bosses;
                         }
                         AttackCount++;
                     }
-                    if (AttackCount >= 3)
-                    {
-                        AttackCount = 0;
-                        AITimer1 = 0;
-                        AttackPhase++;
-                    }
-                    break;
+                }
+                if (AttackCount >= 3)
+                {
+                    AttackCount = 0;
+                    AITimer1 = 0;
+                    AttackPhase++;
+                }
+                break;
+ 
 /*                case 1:
                     if (AITimer1 % 150 == 0)
                     {
@@ -1038,7 +1044,7 @@ namespace ITD.Content.NPCs.Bosses;
         {
             Vector2 eyePos = NPC.Center + new Vector2(0, -60);
             int hitTime = 1;
-            float restTime = masterMode ? 45 : expertMode ? 60 : 60;
+            float restTime = masterMode ? 40 : expertMode ? 50 : 60;
             hitTime = masterMode ? 5 : expertMode ? 5 : 3;
             NPC.dontTakeDamage = true;
 
@@ -1096,7 +1102,7 @@ namespace ITD.Content.NPCs.Bosses;
                     }
                     else
                     {
-                        if (AITimer1++ >= restTime * 3)
+                        if (AITimer1++ >= restTime * 3.5f)
                         {
                             if (!masterMode && !expertMode)
                             {
@@ -1159,6 +1165,7 @@ namespace ITD.Content.NPCs.Bosses;
                     {
                         if (AITimer1++ >= restTime * 2)
                         {
+                        //warp2
                             AI_State = MovementState.FollowingRegular;
                             AttackID = GetNextAttack();
                             ResetStats();
@@ -1367,7 +1374,7 @@ namespace ITD.Content.NPCs.Bosses;
                             }
                             if (AttackCount >= maxDash / 2)
                             {
-                                Teleport(player.Center + new Vector2(0, Main.screenHeight * (AttackCount % 2 == 0 ? 1 : -1)), 40, 80, (int)AttackID);
+                                Teleport(player.Center + new Vector2(NPC.localAI[0], Main.screenHeight * (AttackCount % 2 == 0 ? 1 : -1) + NPC.localAI[0]), 40, 80, (int)AttackID);
                             }
                             else
                             {
@@ -1518,9 +1525,9 @@ namespace ITD.Content.NPCs.Bosses;
                         Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
                         Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicWave>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1);
                         proj1.tileCollide = false;
-                        proj1.timeLeft = 300;
+                        proj1.timeLeft = 120;
                         proj2.tileCollide = false;
-                        proj2.timeLeft = 300;
+                        proj2.timeLeft = 120;
 
                     }
                     if (expertMode || masterMode)
@@ -1545,46 +1552,32 @@ namespace ITD.Content.NPCs.Bosses;
                     }
                     break;
                 case 9:
-                    if (DashTimer == 1)
-                    {
-                    AIRand = 35;//not using rand is better?
-                    }
-                if (DashTimer == time1 + 1 || DashTimer == AIRand - 2)
-                    {
-                    int ring = 128 - (int)(DashTimer * 2);
-                        for (int index1 = 0; index1 < ring; ++index1)
-                        {
-                            Vector2 vector2 = (-Vector2.UnitY.RotatedBy(index1 * 3.14159274101257 * 2 / ring) * new Vector2(8f, 16f)).RotatedBy(NPC.velocity.ToRotation());
-                            int index2 = Dust.NewDust(NPC.Center, 0, 0, ModContent.DustType<CosJelDust>(), 0.0f, 0.0f, 0, new Color(), 1f);
-                            Main.dust[index2].scale = 3f;
-                            Main.dust[index2].noGravity = true;
-                            Main.dust[index2].position = NPC.Center;
-                            Main.dust[index2].velocity = Vector2.Zero;
-                            Main.dust[index2].velocity += vector2 * 1.5f * (reset - DashTimer)/reset + NPC.velocity * 0.5f;
-                        }
-                    }
-                    if (DashTimer == AIRand)
-                    {
-                        shouldBlank = true;
-                    }
-                if (DashTimer % 1 == 0 && DashTimer > time1 + 20 && DashTimer < reset)
+                if (DashTimer == time1 + 1 || DashTimer == time2)
                 {
-                    if (shouldBlank && blankCount++ <= 2)
+                    int ring = 128 - (int)(DashTimer * 2);
+                    for (int index1 = 0; index1 < ring; ++index1)
                     {
+                        Vector2 vector2 = (-Vector2.UnitY.RotatedBy(index1 * 3.14159274101257 * 2 / ring) * new Vector2(8f, 16f)).RotatedBy(NPC.velocity.ToRotation());
+                        int index2 = Dust.NewDust(NPC.Center, 0, 0, ModContent.DustType<CosJelDust>(), 0.0f, 0.0f, 0, new Color(), 1f);
+                        Main.dust[index2].scale = 3f;
+                        Main.dust[index2].noGravity = true;
+                        Main.dust[index2].position = NPC.Center;
+                        Main.dust[index2].velocity = Vector2.Zero;
+                        Main.dust[index2].velocity += vector2 * 1.5f * (reset - DashTimer) / reset + NPC.velocity * 0.5f;
                     }
-                    else
+                }
+                if (DashTimer % 2 == 0 && DashTimer > time1 + 20 && DashTimer < reset)
+                {
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            Vector2 vel1 = Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2);
-                            Vector2 vel2 = Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2);
-                            Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel1.ToRotation(), 0, 15);
-                            Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel2.ToRotation(), 0, 15);
-                            proj1.tileCollide = false;
-                            proj2.tileCollide = false;
-                            proj1.rotation = vel1.ToRotation();
-                            proj2.rotation = vel2.ToRotation();
-                        }
+                        Vector2 vel1 = Vector2.Normalize(NPC.velocity).RotatedBy(Math.PI / 2);
+                        Vector2 vel2 = Vector2.Normalize(NPC.velocity).RotatedBy(-Math.PI / 2);
+                        Projectile proj1 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel1, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel1.ToRotation(), 0, 35);
+                        Projectile proj2 = Projectile.NewProjectileDirect(NPC.GetSource_FromThis(), NPC.Center, vel2, ModContent.ProjectileType<CosmicSwordStar2>(), ProjectileDamage((int)(NPC.damage * 0.75f)), 0, -1, vel2.ToRotation(), 0, 35);
+                        proj1.tileCollide = false;
+                        proj2.tileCollide = false;
+                        proj1.rotation = vel1.ToRotation();
+                        proj2.rotation = vel2.ToRotation();
                     }
                 }
                     break;

@@ -1,7 +1,8 @@
 ﻿using ITD.Content.Projectiles.Friendly.Melee;
+using ITD.Content.Projectiles.Friendly.Ranger;
 using Terraria.DataStructures;
 
-namespace ITD.Content.Items.Weapons.Melee;
+namespace ITD.Content.Items.Weapons.Ranger;
 
 public class ChainedGun : ModItem
 {

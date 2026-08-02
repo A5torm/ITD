@@ -2,11 +2,11 @@
 using Terraria.Audio;
 using Terraria.GameContent;
 
-namespace ITD.Content.Projectiles.Friendly.Melee;
+namespace ITD.Content.Projectiles.Friendly.Ranger;
 
 public class ChainedGunProj : ModProjectile
 {
-    private const string ChainTexturePath = "ITD/Content/Projectiles/Friendly/Melee/ChainedGunChainA"; // The folder path to the flail chain sprite
+    private const string ChainTexturePath = "ITD/Content/Projectiles/Friendly/Ranger/ChainedGunChainA"; // The folder path to the flail chain sprite
 
     private static Asset<Texture2D> chainTexture;
     private static Asset<Texture2D> chainTextureExtra;

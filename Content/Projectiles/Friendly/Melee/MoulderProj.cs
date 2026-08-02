@@ -106,7 +106,7 @@ public class MoulderProj : ModProjectile
                             Projectile.netUpdate = true;
                             Projectile.ResetLocalNPCHitImmunity();
                             Projectile.localNPCHitCooldown = movingHitCooldown;
-                            SoundEngine.PlaySound(SoundID.Item69, player.Center);
+                            //SoundEngine.PlaySound(SoundID.Item69, player.Center);
                             break;
                         }
                     }
@@ -115,7 +115,7 @@ public class MoulderProj : ModProjectile
                     if (SpinningStateTimer % 25 == 0 && ChargeLevel < 2f)
                     {
                         ChargeLevel++;
-                        SoundEngine.PlaySound(SoundID.Item72, player.Center);
+                        //SoundEngine.PlaySound(SoundID.Item72, player.Center);
                         for (int i = 0; i < 4; i++)
                         {
                             Dust dust = Dust.NewDustDirect(player.Center, 0, 0, DustID.Stone, 0, 0, 150, default, 1f + (0.5f * ChargeLevel));

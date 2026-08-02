@@ -71,6 +71,9 @@ public class DepthrockStoneProj : ModProjectile
 
             if (HomingTarget == null)
             {
+                SoundEngine.PlaySound(SoundID.Item5, Projectile.Center);
+                Projectile arrow = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), Projectile.Center, Vector2.Zero, (int)Projectile.ai[0], (int)(Projectile.damage / 1.75f), Projectile.knockBack, Projectile.owner);
+                arrow.velocity = (Main.MouseWorld - Projectile.Center).SafeNormalize(Vector2.Zero) * 14f;
             }
             else
             {

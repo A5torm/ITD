@@ -46,7 +46,7 @@ public class CosmicWave : ModProjectile
 
     public override void AI()
     {
-        if (Projectile.ai[1]++ < 40)
+        if (Projectile.ai[1]++ < 35)
         {
             Projectile.velocity *= 1.05f;
             Projectile.netUpdate = true;
@@ -57,9 +57,9 @@ public class CosmicWave : ModProjectile
                     Projectile.frame++;
             }
         }
-        else if (Projectile.ai[1] >= 60 && Projectile.ai[1] <= 120)
+        else if (Projectile.ai[1] >= 50 && Projectile.ai[1] <= 120)
         {
-            Projectile.velocity *= 0.98f;
+            Projectile.velocity *= 0.96f;
             Projectile.netUpdate = true;
             if (++Projectile.frameCounter >= 4)
             {
