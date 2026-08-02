@@ -118,7 +118,7 @@ public class CosmicSwordStar : ModProjectile
             if (Projectile.localAI[0]++ == 100)
             {
                 SoundEngine.PlaySound(SoundID.Item20, eyePos);
-                Projectile.velocity = Vector2.Normalize(eyePos - Projectile.Center) * 20;
+                Projectile.velocity = Vector2.Normalize(eyePos - Projectile.Center) * 30;
                 Projectile.rotation = Projectile.velocity.ToRotation();
             }
             for (int i = 0; i < 1; i++)

@@ -1,5 +1,4 @@
 ﻿using ITD.Content.Projectiles;
-using ITD.Content.Projectiles.Friendly.Melee;
 using ITD.Content.Projectiles.Friendly.Ranger;
 using ITD.Content.Projectiles.Friendly.Summoner;
 using ITD.Systems;
@@ -7,7 +6,7 @@ using ITD.Utilities;
 using Terraria.Audio;
 using Terraria.DataStructures;
 
-namespace ITD.Content.Items.Weapons.Melee;
+namespace ITD.Content.Items.Weapons.Summoner;
 
 public class UndertakerShovel : ModItem
 {

@@ -7,7 +7,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics.Shaders;
 
-namespace ITD.Content.Projectiles.Friendly.Melee;
+namespace ITD.Content.Projectiles.Friendly.Summoner;
 
 public class UndertakerGhostProj : ModProjectile
 {

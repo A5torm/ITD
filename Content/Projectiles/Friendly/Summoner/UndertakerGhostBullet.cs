@@ -3,7 +3,7 @@ using Terraria.DataStructures;
 using Terraria.Graphics;
 using Terraria.Graphics.Shaders;
 
-namespace ITD.Content.Projectiles.Friendly.Melee;
+namespace ITD.Content.Projectiles.Friendly.Summoner;
 
 public class UndertakerGhostBullet : ModProjectile
 {
