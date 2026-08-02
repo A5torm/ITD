@@ -1,10 +1,10 @@
 using ITD.Content.Buffs.Debuffs;
 using ITD.Content.Items.Materials;
-using ITD.Content.Projectiles.Friendly.Summoner;
+using ITD.Content.Projectiles.Friendly.Mage;
 using ITD.Utilities;
 using Terraria.DataStructures;
 
-namespace ITD.Content.Items.Weapons.Summoner;
+namespace ITD.Content.Items.Weapons.Mage;
 
 public class RiteOfImmolation : ModItem
 {
@@ -15,7 +15,8 @@ public class RiteOfImmolation : ModItem
     public override void SetDefaults()
     {
         Item.damage = 15;
-        Item.DamageType = DamageClass.SummonMeleeSpeed;
+		Item.mana = 4;
+        Item.DamageType = DamageClass.Magic;
         Item.width = 30;
         Item.height = 34;
         Item.useTime = 10;
@@ -35,12 +36,6 @@ public class RiteOfImmolation : ModItem
         MiscHelpers.GetPointOnSwungItemPath(player, 30f, 30f, 0.2f + 0.8f * Main.rand.NextFloat(), player.GetAdjustedItemScale(Item), out Vector2 position, out Vector2 spinningpoint);
         Vector2 value = spinningpoint.RotatedBy((double)(1.57079637f * player.direction * player.gravDir), default);
         Dust.NewDustPerfect(position, DustID.Torch, new Vector2?(value * 4f), 0, default, 1.5f).noGravity = true;
-    }
-
-    public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone)
-    {
-        target.AddBuff(ModContent.BuffType<RiteOfImmolationTagDebuff>(), 300);
-        player.MinionAttackTargetNPC = target.whoAmI;
     }
 
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)

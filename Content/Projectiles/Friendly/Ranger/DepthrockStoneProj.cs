@@ -80,6 +80,14 @@ public class DepthrockStoneProj : ModProjectile
                 arrow.tileCollide = false;
             }
         }
+		if (Main.dedServ)
+			return;
+		Gore gore0 =  Gore.NewGoreDirect(Projectile.GetSource_Death(), Projectile.Center, new Vector2(-2f, -2f), Mod.Find<ModGore>("DepthrockBoulderGore0").Type);
+		Gore gore1 = Gore.NewGoreDirect(Projectile.GetSource_Death(), Projectile.Center, new Vector2(0f, -2f), Mod.Find<ModGore>("DepthrockBoulderGore1").Type);
+        Gore gore2 = Gore.NewGoreDirect(Projectile.GetSource_Death(), Projectile.Center, new Vector2(2f, -2f), Mod.Find<ModGore>("DepthrockBoulderGore2").Type);
+		gore0.timeLeft = 20;
+		gore1.timeLeft = 20;
+		gore2.timeLeft = 20;
     }
     public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
     {

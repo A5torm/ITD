@@ -2,7 +2,7 @@
 using System;
 using Terraria.GameContent;
 
-namespace ITD.Content.Projectiles.Friendly.Summoner;
+namespace ITD.Content.Projectiles.Friendly.Mage;
 
 public class RiteOfImmolationProj : ModProjectile
 {
@@ -28,8 +28,6 @@ public class RiteOfImmolationProj : ModProjectile
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
         target.AddBuff(BuffID.OnFire, 300);
-        target.AddBuff(ModContent.BuffType<RiteOfImmolationTagDebuff>(), 300);
-        Main.player[Projectile.owner].MinionAttackTargetNPC = target.whoAmI;
     }
 
     public override void AI()
