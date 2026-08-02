@@ -1,15 +1,37 @@
 ﻿using ITD.Systems;
 using ITD.Utilities;
+using ITD.Systems.DataStructures;
+using ITD.Systems.Extensions;
 using System;
 using Terraria.Audio;
+using Terraria.Graphics;
+using Terraria.Graphics.Shaders;
 
 namespace ITD.Content.Projectiles.Friendly.Melee;
 
 public class MandinataProjectile : ModProjectile
 {
+	public const float visualLength = 90f;
+	
+	public ref float Direction => ref Projectile.ai[0];
+	public int maxTime = 30;
+    public float speed;
+	
+	public MiscShaderData Shader = new MiscShaderData(Main.VertexPixelShaderRef, "MagicMissile")
+        .UseProjectionMatrix(true)
+        .UseImage0("Images/Extra_" + 201)
+        .UseImage1("Images/Extra_" + 193)
+        .UseImage2("Images/Extra_" + 252)
+        .UseSaturation(-2.8f)
+        .UseOpacity(2f);
+	public static VertexStrip vertexStrip = new();
+	
+	public override void SetStaticDefaults()
+    {
+        ProjectileID.Sets.TrailCacheLength[Projectile.type] = 15;
+    }
     public override void SetDefaults()
     {
-        // Projectile.CloneDefaults(ProjectileID.MonkStaffT2);
         Projectile.width = Projectile.height = 24;
         Projectile.friendly = true;
         Projectile.DamageType = DamageClass.Melee;
@@ -18,111 +40,84 @@ public class MandinataProjectile : ModProjectile
         Projectile.tileCollide = false;
         Projectile.ignoreWater = true;
         Projectile.ownerHitCheck = true;
+		Projectile.timeLeft = 30;
     }
 
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
-        Player player = Main.player[Projectile.owner];
-        ITDPlayer modPlayer = player.GetITDPlayer();
-        if (Projectile.ai[1] == 0f && modPlayer.itemVar[0] == 0f)
+        if (Main.myPlayer == Projectile.owner)
         {
-            modPlayer.itemVar[0] = 1f;
-            for (int i = 0; i < 10; i++)
-            {
-                Dust dust = Dust.NewDustDirect(player.Center, 1, 1, DustID.Torch, 0f, 0f, 110, default, 3f);
-                dust.velocity *= 4f;
-                dust.noGravity = true;
-            }
-            SoundEngine.PlaySound(SoundID.Item45, player.Center);
+            Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), target.Center, new Vector2(), ModContent.ProjectileType<MandinataBreath>(), (int)(Projectile.damage * 0.33f), 0, Projectile.owner);
         }
     }
 
-    public override bool PreAI() // vanilla code of doom
+    public override bool PreAI()
     {
         Player player = Main.player[Projectile.owner];
-        Vector2 vector = player.RotatedRelativePoint(player.MountedCenter, false, true);
-        Projectile.direction = player.direction;
+
+        if (Projectile.timeLeft == maxTime)
+        {
+            maxTime = player.itemAnimationMax;
+            speed = 30f / maxTime;
+            Projectile.timeLeft = maxTime;
+        }
+
+        if (Projectile.timeLeft < 5)
+            Projectile.Opacity -= 0.2f;
+        else if (Projectile.Opacity < 1f)
+            Projectile.Opacity += 0.2f;
+
+        Projectile.Center = player.MountedCenter;
+        Projectile.velocity = Projectile.velocity.RotatedBy(0.3f * Projectile.timeLeft / maxTime * Direction * speed);
+        Projectile.rotation = Projectile.velocity.ToRotation();
+
+        for (int i = Projectile.oldPos.Length - 1; i > 0; i--) // custom trailing
+        {
+            Projectile.oldPos[i] = Projectile.oldPos[i - 1];
+            Projectile.oldRot[i] = Projectile.oldRot[i - 1];
+        }
+        Projectile.oldPos[0] = Projectile.Center + Projectile.velocity * 2.8f;
+        Projectile.oldRot[0] = Projectile.rotation + MathHelper.PiOver2;
+		
         player.heldProj = Projectile.whoAmI;
-        Projectile.Center = vector;
-        if (player.dead)
-        {
-            Projectile.Kill();
-            return false;
-        }
-        if (!player.frozen)
-        {
-            Projectile.spriteDirection = Projectile.direction = player.direction;
-            Vector2 vector2 = vector;
-            /*Projectile.alpha -= 127;
-				if (Projectile.alpha < 0)
-				{
-					Projectile.alpha = 0;
-				}*/
-            if (Projectile.localAI[0] > 0f)
-            {
-                Projectile.localAI[0] -= 1f;
-            }
-            float num = player.itemAnimation / (float)player.itemAnimationMax;
-            float num2 = 1f - num;
-            float num3 = Projectile.velocity.ToRotation();
-            float num4 = Projectile.velocity.Length();
-            float num5 = 22f;
-            Vector2 spinningpoint = new Vector2(1f, 0f).RotatedBy((double)(3.14159274f + num2 * 6.28318548f), default) * new Vector2(num4, Projectile.ai[0]);
-            Projectile.position += spinningpoint.RotatedBy((double)num3, default) + new Vector2(num4 + num5, 0f).RotatedBy((double)num3, default);
-            Vector2 target = vector2 + spinningpoint.RotatedBy((double)num3, default) + new Vector2(num4 + num5 + 40f, 0f).RotatedBy((double)num3, default);
-            Projectile.rotation = vector2.AngleTo(target) + 0.7853982f * player.direction;
-            if (Projectile.spriteDirection == -1)
-            {
-                Projectile.rotation += 3.14159274f;
-            }
-        }
-        if (player.whoAmI == Main.myPlayer && player.itemAnimation <= 2)
-        {
-            Projectile.Kill();
-            //player.reuseDelay = 2;
-        }
+        player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, Projectile.rotation - MathHelper.PiOver2);
 
-        Vector2 flameVelocity = (Projectile.Center - player.Center) * 0.2f;
-        if ((player.itemAnimation == 9 || player.itemAnimation == 13 || player.itemAnimation == 17) && Main.myPlayer == Projectile.owner && Projectile.ai[1] == 1f)
-        {
-            Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), player.Center, flameVelocity, ModContent.ProjectileType<MandinataBreath>(), (int)(Projectile.damage * 0.33f), Projectile.knockBack * 0.5f, Projectile.owner);
-        }
-
-        Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Torch, 0f, 0f, 110, default, 3f);
-        dust.velocity = flameVelocity * 0.25f;
-        dust.noGravity = true;
+        //Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Torch, 0f, 0f, 110, default, 3f);
+        //dust.velocity = Projectile.velocity * 0.1f;
+        //dust.noGravity = true;
 
         return false;
     }
 
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
-        float f3 = Projectile.rotation - 0.7853982f * Math.Sign(Projectile.velocity.X) + ((Projectile.spriteDirection == -1) ? 3.14159274f : 0f);
-        float num24 = 0f;
-        float scaleFactor5 = -95f;
-        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center, Projectile.Center + f3.ToRotationVector2() * scaleFactor5, 23f * Projectile.scale, ref num24);
+        float num32 = 0f;
+        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center, Projectile.Center + Projectile.velocity.SafeNormalize(-Vector2.UnitY) * visualLength * Projectile.scale, 32f * Projectile.scale, ref num32);
     }
 
+	private Color StripColors(float progressOnStrip)
+    {
+        Color result = Color.Orange;
+        result.A = 0;
+        return result * Projectile.Opacity * Projectile.Opacity;
+    }
+    private float StripWidth(float progressOnStrip)
+    {
+        return 32f;
+    }
     public override bool PreDraw(ref Color lightColor)
     {
-        Player player = Main.player[Projectile.owner];
-        Vector2 position = Projectile.position + new Vector2(Projectile.width, Projectile.height) / 2f + Vector2.UnitY * Projectile.gfxOffY - Main.screenPosition - Vector2.UnitY * player.gfxOffY;
-        Texture2D texture = ModContent.Request<Texture2D>(Texture).Value;
-        Vector2 origin = new Vector2(texture.Width, texture.Height) / 2f;
-        float rotation = Projectile.rotation;
-        origin = new Vector2((Projectile.spriteDirection == 1) ? (texture.Width - -8f) : -8f, (player.gravDir == 1f) ? -8f : (texture.Height - -8f));
-        SpriteEffects spriteEffects = SpriteEffects.None;
-        if (Projectile.spriteDirection == -1)
-        {
-            spriteEffects = SpriteEffects.FlipHorizontally;
-        }
-        if (player.gravDir == -1f)
-        {
-            spriteEffects |= SpriteEffects.FlipVertically;
-            rotation += 1.57079637f * (float)-(float)Projectile.spriteDirection;
-        }
+		Shader.Apply(null);
+        vertexStrip.PrepareStrip(Projectile.oldPos, Projectile.oldRot, StripColors, StripWidth, -Main.screenPosition, new int?(Projectile.oldPos.Length), true);
+        vertexStrip.DrawTrail();
 
-        Main.EntitySpriteDraw(texture, position, null, Projectile.GetAlpha(lightColor), rotation, origin, Projectile.scale, spriteEffects, 0f);
+        Main.spriteBatch.End(out SpriteBatchData spriteBatchData); // unapply shaders
+        Main.spriteBatch.Begin(spriteBatchData);
+		
+		Texture2D tex = ModContent.Request<Texture2D>(Texture).Value;
+		Vector2 extraHoldout = Projectile.velocity;
+        Vector2 drawPos = Projectile.Center + extraHoldout - Main.screenPosition + new Vector2(0f, Main.player[Projectile.owner].gfxOffY);
+        Main.EntitySpriteDraw(tex, drawPos, null, lightColor * Projectile.Opacity, Projectile.rotation + MathHelper.PiOver4, tex.Size() * 0.5f, Projectile.scale, SpriteEffects.None);
         return false;
     }
 }

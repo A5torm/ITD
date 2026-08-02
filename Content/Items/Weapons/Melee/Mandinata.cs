@@ -9,6 +9,7 @@ namespace ITD.Content.Items.Weapons.Melee;
 
 public class Mandinata : ModItem
 {
+	public int directionCycle = 0;
     public override void SetStaticDefaults()
     {
         Item.ResearchUnlockCount = 1;
@@ -22,8 +23,8 @@ public class Mandinata : ModItem
         Item.DamageType = DamageClass.Melee;
         Item.width = 40;
         Item.height = 40;
-        Item.useTime = 26;
-        Item.useAnimation = 26;
+        Item.useTime = 30;
+        Item.useAnimation = 30;
         Item.UseSound = SoundID.Item20;
         Item.useStyle = ItemUseStyleID.Shoot;
         Item.knockBack = 7;
@@ -38,11 +39,15 @@ public class Mandinata : ModItem
 
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
     {
-        ITDPlayer modPlayer = player.GetITDPlayer();
-        float ai = Main.rand.NextFloat(0.5f, 1f) * Item.shootSpeed * 0.75f * player.direction;
-        Projectile.NewProjectileDirect(source, position, velocity, ModContent.ProjectileType<MandinataProjectile>(), damage, knockback, player.whoAmI, ai, modPlayer.itemVar[0]);
-        if (modPlayer.itemVar[0] == 1f)
-            modPlayer.itemVar[0] = 0f;
+		float direction = 1;
+        directionCycle = ++directionCycle % 2;
+        if (directionCycle == 0)
+            direction = -1;
+        velocity.Normalize();
+
+        float adjustedItemScale = player.GetAdjustedItemScale(player.inventory[player.selectedItem]);
+		
+        Projectile.NewProjectile(source, position, velocity.RotatedBy(-2 * direction) * adjustedItemScale * 32f, type, damage, knockback, player.whoAmI, direction);
         return false;
     }
 
