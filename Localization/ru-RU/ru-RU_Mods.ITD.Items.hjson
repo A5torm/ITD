@@ -1580,3 +1580,8 @@ CosmicWaterGun: {
 	// DisplayName: Cosmic Water Gun
 	// Tooltip: ""
 }
+
+SplendidPainting: {
+	// DisplayName: Splendid Painting
+	// Tooltip: ""
+}
