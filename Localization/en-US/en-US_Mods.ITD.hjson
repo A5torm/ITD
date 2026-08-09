@@ -286,6 +286,7 @@ Projectiles: {
 	HoneyGunProj.DisplayName: Honey Gun Proj
 	CosmicWaterProj.DisplayName: Cosmic Water Proj
 	GhostbusterProjOld.DisplayName: Ghostbuster Proj Old
+	SplendidPaintingPet.DisplayName: Splendid Painting Pet
 }
 
 NPCs: {
@@ -563,6 +564,11 @@ Buffs: {
 	WickedHeartBuff: {
 		DisplayName: Wicked Heart Buff
 		Description: Mods.ITD.Buffs.WickedHeartBuff.Description
+	}
+
+	SplendidPaintingBuff: {
+		DisplayName: Splendid Painting Buff
+		Description: Mods.ITD.Buffs.SplendidPaintingBuff.Description
 	}
 }
 
