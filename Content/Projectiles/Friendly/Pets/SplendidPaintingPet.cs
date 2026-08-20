@@ -17,7 +17,7 @@ namespace ITD.Content.Projectiles.Friendly.Pets
         {
             Main.projFrames[Type] = 1;
             ProjectileID.Sets.LightPet[Type] = true;
-            ProjectileID.Sets.TrailCacheLength[Type] = 8;
+            ProjectileID.Sets.TrailCacheLength[Type] = 1;
             ProjectileID.Sets.TrailingMode[Type] = 2;
         }
 
@@ -51,7 +51,7 @@ namespace ITD.Content.Projectiles.Friendly.Pets
             float brilliance;
             if (Main.dayTime)
             {
-                brilliance = MathHelper.Lerp(2f, 1f, distanceFromCenter);
+                brilliance = MathHelper.Lerp(2f, 1f, distanceFromCenter);//just the number in the code dumbo
             }
             else
             {
@@ -61,7 +61,8 @@ namespace ITD.Content.Projectiles.Friendly.Pets
             float essScale = MiscHelpers.BetterEssScale(2, 0.2f);
             brilliance *= MiscHelpers.BetterEssScale(5, 0.1f);
             Projectile.rotation += 0.0025f;
-            Projectile.Center = Vector2.Lerp(Projectile.Center, player.Top + new Vector2(20 * player.direction + player.velocity.X * 10, -40 * essScale), 0.1f);
+            //please hold
+            Projectile.Center = Vector2.Lerp(Projectile.Center, player.Top + new Vector2(0 * player.direction + player.velocity.X * 15, -40 * essScale), 0.1f);
 
             if (!Main.dedServ)
             {
@@ -114,7 +115,7 @@ namespace ITD.Content.Projectiles.Friendly.Pets
             }
 
             // Draw the main projectile sprite
-            Main.EntitySpriteDraw(tex, miragePos, frame, Color.White * Projectile.Opacity, Projectile.rotation, origin, Projectile.scale, SpriteEffects.None, 0);
+            Main.EntitySpriteDraw(tex, miragePos, frame, Color.White * Projectile.Opacity * 0.8f, Projectile.rotation, origin, Projectile.scale, SpriteEffects.None, 0);
             return false;
         }
     }

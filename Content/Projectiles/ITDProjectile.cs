@@ -1,4 +1,6 @@
-﻿namespace ITD.Content.Projectiles;
+﻿using ITD.Utilities;
+
+namespace ITD.Content.Projectiles;
 
 /// <summary>
 /// Have you ever wished that <see cref="ModProjectile.OnHitPlayer(Player, Player.HurtInfo)"/> ran for PVP players? Well, worry no more, as this does it!
@@ -12,6 +14,9 @@ public abstract class ITDProjectile : ModProjectile
     /// <b>Note:</b> If relying on this method to Apply a shader to a projectile, you also need to make sure, if the projectile uses custom drawing, that the textures drawn are drawn using <see cref="Main.EntitySpriteDraw(Terraria.DataStructures.DrawData)"/> or its overloads.
     /// </summary>
     /// <returns></returns>
+    /// 
+    public Rectangle BigHitboxTiles => MiscHelpers.TileRectangle(Projectile);
+
     public virtual int ProjectileShader(int originalShader)
     {
         return originalShader;
