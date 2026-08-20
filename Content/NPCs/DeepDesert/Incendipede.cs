@@ -14,11 +14,11 @@ public class IncendipedeHead : ITDNPC
     public int WormLength { get { return (int)NPC.ai[2]; } set { NPC.ai[2] = value; } }
     public ref float AITimer => ref NPC.ai[3];
     public bool Wall;
-    public const int SpacingBetween = 8;
+    public const int SpacingBetween = 6;
     public override void FindFrame(int frameHeight) => CommonFrameLoop(frameHeight);
     public override void SetStaticDefaultsSafe()
     {
-        Main.npcFrameCount[Type] = 3;
+        Main.npcFrameCount[Type] = 4;
         // i'm using this for the actual segment following logic so consider this the length limit for incendipedes
         NPCID.Sets.TrailCacheLength[Type] = 10 * SpacingBetween;
         // idc about getting rotations cuz we can just calculate those on the fly
@@ -328,7 +328,7 @@ public class IncendipedeTail : ITDNPC
     public override void SetStaticDefaultsSafe()
     {
         HiddenFromBestiary = true;
-        Main.npcFrameCount[Type] = 3;
+        Main.npcFrameCount[Type] = 4;
         NPCID.Sets.TrailCacheLength[Type] = 2;
         NPCID.Sets.TrailingMode[Type] = NPCTrailingID.PosEveryFrame;
     }

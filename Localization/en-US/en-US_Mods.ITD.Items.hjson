@@ -1592,3 +1592,8 @@ SplendidPainting: {
 	DisplayName: Splendid Painting
 	Tooltip: ""
 }
+
+IncendipedeStaff: {
+	DisplayName: Incendipede Staff
+	Tooltip: ""
+}

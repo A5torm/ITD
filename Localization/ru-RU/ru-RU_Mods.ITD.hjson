@@ -287,6 +287,9 @@ Projectiles: {
 	// CosmicWaterProj.DisplayName: Cosmic Water Proj
 	// GhostbusterProjOld.DisplayName: Ghostbuster Proj Old
 	// SplendidPaintingPet.DisplayName: Splendid Painting Pet
+	// IncendipedeMinionBody.DisplayName: Incendipede Minion Body
+	// IncendipedeMinionHead.DisplayName: Incendipede Minion Head
+	// IncendipedeMinionTail.DisplayName: Incendipede Minion Tail
 }
 
 NPCs: {
@@ -569,6 +572,11 @@ Buffs: {
 	SplendidPaintingBuff: {
 		// DisplayName: Splendid Painting Buff
 		// Description: Mods.ITD.Buffs.SplendidPaintingBuff.Description
+	}
+
+	IncendipedeMinionBuff: {
+		// DisplayName: Incendipede Minion Buff
+		// Description: Mods.ITD.Buffs.IncendipedeMinionBuff.Description
 	}
 }
 

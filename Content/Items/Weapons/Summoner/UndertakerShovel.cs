@@ -59,4 +59,8 @@ public class UndertakerShovel : ModItem
             }
         }
     }
+    public override bool MeleePrefix()
+    {
+        return true;
+    }
 }
