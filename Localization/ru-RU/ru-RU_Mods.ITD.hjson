@@ -575,7 +575,7 @@ Buffs: {
 	}
 
 	IncendipedeMinionBuff: {
-		// DisplayName: Incendipede Minion Buff
+		// DisplayName: Incendipede Minion
 		// Description: Mods.ITD.Buffs.IncendipedeMinionBuff.Description
 	}
 }

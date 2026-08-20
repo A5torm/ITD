@@ -27,9 +27,9 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
 
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Type] = 4;
+            Main.projFrames[Type] = 2;
             ProjectileID.Sets.MinionTargettingFeature[Type] = true;
-            ProjectileID.Sets.TrailCacheLength[Type] = 10 * SpacingBetween;
+            ProjectileID.Sets.TrailCacheLength[Type] = 200;
             ProjectileID.Sets.TrailingMode[Type] = 2;
         }
 
@@ -59,13 +59,26 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
             if (player.HasBuff(ModContent.BuffType<IncendipedeMinionBuff>()))
                 Projectile.timeLeft = 2;
 
-            if (player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionTail>()] == 0)
-                Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, Vector2.Zero, ModContent.ProjectileType<IncendipedeMinionTail>(), Projectile.damage, Projectile.knockBack, player.whoAmI);
+            int bodyCount = player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionBody>()];
+            Projectile.damage = (int)(Projectile.originalDamage * (1f + (bodyCount * 0.2f)));
+
+            if (Projectile.localAI[0] == 0)
+            {
+                Projectile.localAI[0] = 1;
+                if (player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionTail>()] == 0)
+                {
+                    Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, Vector2.Zero, ModContent.ProjectileType<IncendipedeMinionTail>(), Projectile.damage, Projectile.knockBack, player.whoAmI);
+                }
+            }
 
             if (Projectile.Distance(player.Center) > 1000f)
             {
                 Projectile.Center = player.Center;
                 Projectile.velocity = Vector2.Zero;
+                for (int i = 0; i < Projectile.oldPos.Length; i++)
+                {
+                    Projectile.oldPos[i] = Projectile.position;
+                }
                 Projectile.netUpdate = true;
             }
 
@@ -94,16 +107,10 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
 
             if (HomingTarget != null)
             {
-                if (Wall)
-                {
-                    Vector2 attackOffset = new Vector2((float)Math.Cos(SineTimer * 0.04f) * 150f, (float)Math.Sin(SineTimer * 0.08f) * 80f);
-                    WallMovement(HomingTarget.Center + attackOffset);
-                }
-                else
-                {
-                    Vector2 attackOffset = new Vector2((float)Math.Sin(SineTimer * 0.02f) * 200f, 0f);
-                    GroundMovement(HomingTarget.Center + attackOffset);
-                }
+                Vector2 targetPos = HomingTarget.Center;
+
+                if (Wall) WallMovement(targetPos);
+                else GroundMovement(targetPos);
 
                 if (Collision.CanHitLine(Projectile.Center, 1, 1, HomingTarget.Center, 1, 1))
                 {
@@ -120,7 +127,7 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
                     {
                         Vector2 direction = Projectile.velocity.SafeNormalize(Vector2.UnitX);
                         direction = direction.RotatedByRandom(MathHelper.ToRadians(10));
-                        int p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, direction * 8, ModContent.ProjectileType<IncendipedeBreath>(), Projectile.originalDamage / 2, 0, Projectile.owner);
+                        int p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, direction * 8, ModContent.ProjectileType<IncendipedeBreath>(), Projectile.damage / 2, 0, Projectile.owner);
                         Main.projectile[p].friendly = true;
                         Main.projectile[p].hostile = false;
                     }
@@ -139,7 +146,7 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
                 }
                 else
                 {
-                    Vector2 idleOffset = new Vector2((float)Math.Sin(SineTimer * 0.02f) * 200f, 0f);
+                    Vector2 idleOffset = new Vector2((float)Math.Sin(SineTimer * 0.02f) * 150f, 0f);
                     GroundMovement(player.Center + idleOffset);
                 }
             }
@@ -176,7 +183,7 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
 
         private void GroundMovement(Vector2 targetPos)
         {
-            Projectile.velocity.Y += 0.2f;
+            Projectile.velocity.Y += 0.1f;
             int directionX = Projectile.Center.X < targetPos.X ? 1 : -1;
             float xSpeed = 3f;
 
@@ -212,7 +219,7 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
     {
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Type] = 8;
+            Main.projFrames[Type] = 4;
         }
 
         public override void SetDefaults()
@@ -237,40 +244,59 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
             }
             Projectile.timeLeft = 2;
 
+            int bodyCount = player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionBody>()];
+            Projectile.damage = (int)(Projectile.originalDamage * (1f + (bodyCount * 0.2f)));
+
             Projectile head = Main.projectile.FirstOrDefault(p => p.active && p.owner == Projectile.owner && p.type == ModContent.ProjectileType<IncendipedeMinionHead>());
             if (head != null)
             {
                 var bodies = Main.projectile.Where(p => p.active && p.owner == Projectile.owner && p.type == Type).OrderBy(p => p.whoAmI).ToList();
                 int myID = bodies.IndexOf(Projectile) + 1;
-                int spacingIndex = myID * IncendipedeMinionHead.SpacingBetween;
+                int spacingIndex = Math.Min(myID * IncendipedeMinionHead.SpacingBetween, head.oldPos.Length - 1);
 
-                if (spacingIndex < head.oldPos.Length && head.oldPos[spacingIndex] != Vector2.Zero)
+                if (spacingIndex < head.oldPos.Length)
                 {
-                    Projectile.position = head.oldPos[spacingIndex];
-                    Projectile.rotation = head.oldRot[spacingIndex];
-                    if (spacingIndex > 0)
-                        Projectile.spriteDirection = (Projectile.position - head.oldPos[spacingIndex - 1]).X > 0 ? 1 : -1;
-
-                    if (head.ai[1] != 0)
+                    Vector2 possiblePos = head.oldPos[spacingIndex];
+                    if (possiblePos != Vector2.Zero)
                     {
-                        Projectile.ai[0]++;
-                        if (Projectile.ai[0] > 180)
+                        Projectile.position = possiblePos;
+                        Projectile.rotation = head.oldRot[spacingIndex];
+                        if (spacingIndex > 0)
                         {
-                            Projectile.ai[0] = Main.rand.Next(-30, 30);
-                            if (Main.myPlayer == Projectile.owner)
+                            Vector2 frontPos = head.oldPos[spacingIndex - 1];
+                            if (frontPos != Vector2.Zero)
                             {
-                                Vector2 dir = (Projectile.position - head.oldPos[spacingIndex - 1]).SafeNormalize(Vector2.UnitX);
-                                Vector2 perp = dir.RotatedBy(Main.rand.NextBool() ? MathHelper.PiOver2 : -MathHelper.PiOver2) * 4f;
-
-                                int p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.originalDamage / 2, 1f, Projectile.owner);
-                                Main.projectile[p].friendly = true;
-                                Main.projectile[p].hostile = false;
+                                Projectile.spriteDirection = (frontPos.X - Projectile.position.X) > 0 ? 1 : -1;
                             }
+                        }
+
+                        if (head.ai[1] != 0)
+                        {
+                            Projectile.ai[0]++;
+                            if (Projectile.ai[0] > 180)
+                            {
+                                Projectile.ai[0] = Main.rand.Next(-30, 30);
+                                if (Main.myPlayer == Projectile.owner)
+                                {
+                                    Vector2 dir = (Projectile.position - head.oldPos[Math.Max(0, spacingIndex - 1)]).SafeNormalize(Vector2.UnitX);
+                                    Vector2 perp = dir.RotatedBy(Main.rand.NextBool() ? MathHelper.PiOver2 : -MathHelper.PiOver2) * 4f;
+
+                                    int p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.damage / 2, 1f, Projectile.owner);
+                                    Main.projectile[p].friendly = true;
+                                    Main.projectile[p].hostile = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Projectile.ai[0] = myID * 10;
                         }
                     }
                     else
                     {
-                        Projectile.ai[0] = myID * 10;
+                        Projectile.position = head.position;
+                        Projectile.rotation = head.rotation;
+                        Projectile.spriteDirection = head.spriteDirection;
                     }
                 }
             }
@@ -330,45 +356,63 @@ namespace ITD.Content.Projectiles.Friendly.Summoner
             }
             Projectile.timeLeft = 2;
 
+            int bodyCount = player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionBody>()];
+            Projectile.damage = (int)(Projectile.originalDamage * (1f + (bodyCount * 0.2f)));
+
             Projectile head = Main.projectile.FirstOrDefault(p => p.active && p.owner == Projectile.owner && p.type == ModContent.ProjectileType<IncendipedeMinionHead>());
             if (head != null)
             {
-                int bodyCount = player.ownedProjectileCounts[ModContent.ProjectileType<IncendipedeMinionBody>()];
-                int spacingIndex = (bodyCount + 1) * IncendipedeMinionHead.SpacingBetween;
+                int spacingIndex = Math.Min((bodyCount + 1) * IncendipedeMinionHead.SpacingBetween, head.oldPos.Length - 1);
 
-                if (spacingIndex < head.oldPos.Length && head.oldPos[spacingIndex] != Vector2.Zero)
+                if (spacingIndex < head.oldPos.Length)
                 {
-                    Projectile.position = head.oldPos[spacingIndex];
-                    Projectile.rotation = head.oldRot[spacingIndex];
-                    if (spacingIndex > 0)
-                        Projectile.spriteDirection = (Projectile.position - head.oldPos[spacingIndex - 1]).X > 0 ? 1 : -1;
-
-                    if (head.ai[1] != 0)
+                    Vector2 possiblePos = head.oldPos[spacingIndex];
+                    if (possiblePos != Vector2.Zero)
                     {
-                        Projectile.ai[0]++;
-                        if (Projectile.ai[0] > 180)
+                        Projectile.position = possiblePos;
+                        Projectile.rotation = head.oldRot[spacingIndex];
+                        if (spacingIndex > 0)
                         {
-                            Projectile.ai[0] = Main.rand.Next(-20, 20);
-                            if (Main.myPlayer == Projectile.owner && spacingIndex > 0)
+                            Vector2 frontPos = head.oldPos[spacingIndex - 1];
+                            if (frontPos != Vector2.Zero)
                             {
-                                Vector2 dir = (Projectile.position - head.oldPos[spacingIndex - 1]).SafeNormalize(Vector2.UnitX);
-                                Vector2 perp = dir.RotatedBy(MathHelper.PiOver2) * 4f;
-                                Vector2 behind = -dir * 4f;
-
-                                int p1 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.originalDamage / 2, 1f, Projectile.owner);
-                                Main.projectile[p1].friendly = true; Main.projectile[p1].hostile = false;
-
-                                int p2 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, -perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.originalDamage / 2, 1f, Projectile.owner);
-                                Main.projectile[p2].friendly = true; Main.projectile[p2].hostile = false;
-
-                                int p3 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, behind, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.originalDamage / 2, 1f, Projectile.owner);
-                                Main.projectile[p3].friendly = true; Main.projectile[p3].hostile = false;
+                                Projectile.spriteDirection = (frontPos.X - Projectile.position.X) > 0 ? 1 : -1;
                             }
+                        }
+
+                        if (head.ai[1] != 0)
+                        {
+                            Projectile.ai[0]++;
+                            if (Projectile.ai[0] > 180)
+                            {
+                                Projectile.ai[0] = Main.rand.Next(-20, 20);
+                                if (Main.myPlayer == Projectile.owner && spacingIndex > 0)
+                                {
+                                    Vector2 dir = (Projectile.position - head.oldPos[Math.Max(0, spacingIndex - 1)]).SafeNormalize(Vector2.UnitX);
+                                    Vector2 perp = dir.RotatedBy(MathHelper.PiOver2) * 4f;
+                                    Vector2 behind = -dir * 4f;
+
+                                    int p1 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.damage / 2, 1f, Projectile.owner);
+                                    Main.projectile[p1].friendly = true; Main.projectile[p1].hostile = false;
+
+                                    int p2 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, -perp, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.damage / 2, 1f, Projectile.owner);
+                                    Main.projectile[p2].friendly = true; Main.projectile[p2].hostile = false;
+
+                                    int p3 = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, behind, ModContent.ProjectileType<IncendipedeFireSpike>(), Projectile.damage / 2, 1f, Projectile.owner);
+                                    Main.projectile[p3].friendly = true; Main.projectile[p3].hostile = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Projectile.ai[0] = 0;
                         }
                     }
                     else
                     {
-                        Projectile.ai[0] = 0;
+                        Projectile.position = head.position;
+                        Projectile.rotation = head.rotation;
+                        Projectile.spriteDirection = head.spriteDirection;
                     }
                 }
             }
