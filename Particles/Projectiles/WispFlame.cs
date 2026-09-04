@@ -39,7 +39,7 @@ public class WispFlame : ParticleEmitter
             for (int j = 0; j < 5; j++)
             {
                 Color color = new(75, 75, 75, 0);
-                particle.DrawCommon(in Main.spriteBatch, Texture, CanvasOffset + Main.rand.NextVector2Square(-6f, 6f) * particle.scale, color, sourceRectangle, origin, particle.rotation, particle.scale);
+                particle.DrawCommon(in Main.spriteBatch, Texture, CanvasOffset + Main.rand.NextVector2Square(-2f, 2f) * particle.scale, color, sourceRectangle, origin, particle.rotation, particle.scale);
             }
         }
     }
