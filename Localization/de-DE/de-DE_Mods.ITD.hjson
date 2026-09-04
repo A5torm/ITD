@@ -290,6 +290,8 @@ Projectiles: {
 	// IncendipedeMinionBody.DisplayName: Incendipede Minion Body
 	// IncendipedeMinionHead.DisplayName: Incendipede Minion Head
 	// IncendipedeMinionTail.DisplayName: Incendipede Minion Tail
+	// WaxWhipProj.DisplayName: Wax Whip Proj
+	// WispFireOrb.DisplayName: Wisp Fire Orb
 }
 
 NPCs: {
