@@ -49,7 +49,7 @@ public class MotherWisp : ModNPC
 
     int faceFrameTotal = 7;
     int faceFrameCurrent = 0;
-
+    private int consecutiveMainCount = 0;
     public override void SetStaticDefaults()
     {
     }
@@ -129,17 +129,31 @@ public class MotherWisp : ModNPC
             case ActionState.ChooseCombo:
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    MainAttack = 0;
+                    float prevMain = MainAttack;
+                    float prevSec = SecAttack;
                     do
                     {
-                        SecAttack = Main.rand.Next(1, 3);
-                    } while (SecAttack == MainAttack);
+                        MainAttack = 1;
+                    }
+                    while (MainAttack == prevMain && consecutiveMainCount >= 2);
+                    do
+                    {
+                        SecAttack = 0;
+                    }
+                    while (SecAttack == MainAttack || (MainAttack == prevMain && SecAttack == prevSec));
+                    if (MainAttack == prevMain)
+                    {
+                        consecutiveMainCount++;
+                    }
+                    else
+                    {
+                        consecutiveMainCount = 1;
+                    }
 
                     AI_State = (float)ActionState.ExecuteCombo;
                     NPC.netUpdate = true;
                 }
                 break;
-
             case ActionState.ExecuteCombo:
                 switch ((BaseAttack)MainAttack)
                 {
@@ -457,12 +471,132 @@ public class MotherWisp : ModNPC
         }
         else if (sec == BaseAttack.CandleMash)
         {
+            float windupEnd = 40f;
+            float blowEnd = 80f;
+            float positionEnd = 160f;
+            float attackTimeout = 220f;
+            float telegraphStart = 240f;
+            float blastTime = 270f;
+            float restEnd = 300f;
+
+            Vector2 aimDir = NPC.DirectionTo(player.Center);
+
+            if (time < windupEnd)
+            {
+                Vector2 mouthPos = NPC.Center + aimDir * 50f;
+                candle.Center = Vector2.Lerp(candle.Center, mouthPos, 0.2f);
+                candle.velocity = Vector2.Zero;
+            }
+            else if (time < blowEnd)
+            {
+                Vector2 mouthPos = NPC.Center + aimDir * 100f;
+                candle.Center = mouthPos;
+                candle.velocity = Vector2.Zero;
+
+                if (time % 2 == 0)
+                {
+                    SoundEngine.PlaySound(SoundID.Item34, candle.Center);
+
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        float spread = MathHelper.ToRadians(25);
+                        Vector2 shootVel = aimDir.RotatedByRandom(spread) * Main.rand.NextFloat(8f, 12f);
+                        int projType = ModContent.ProjectileType<WispFireRain>();
+
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(), candle.Center, shootVel,
+                            projType, (int)(NPC.damage * 0.5f), 0, -1);
+                    }
+                }
+            }
+            else if (time >= blowEnd)
+            {
+                Lighting.AddLight(candle.Center, 0.8f, 0.4f, 0f);
+
+                if (candle.ModNPC is WispCandle wispCandle)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float candleWiggle = (float)Math.Sin((Main.GlobalTimeWrappedHourly * 30f) + Main.rand.NextFloat(MathHelper.TwoPi)) * 5f;
+                        Vector2 flameVel = new Vector2(candleWiggle, -Main.rand.NextFloat(10f, 18f));
+                        wispCandle.emitter?.Emit(candle.Center + Main.rand.NextVector2Circular(15f, 15f), flameVel, 0f, 50);
+                    }
+                }
+
+                if (time < positionEnd)
+                {
+                    Vector2 aimPos = player.Center - new Vector2(0, 300f);
+                    candle.Center = Vector2.Lerp(candle.Center, aimPos, 0.08f);
+                    candle.velocity = Vector2.Zero;
+                }
+                else if (time == positionEnd)
+                {
+                    candle.velocity = new Vector2(0, 35f);
+                    candle.netUpdate = true;
+                }
+                else if (time > positionEnd && time <= attackTimeout)
+                {
+                    bool hitTile = Collision.SolidCollision(candle.position, candle.width, candle.height);
+                    bool hitFloor = candle.Bottom.Y >= player.Bottom.Y;
+
+                    if (hitTile || hitFloor || time == attackTimeout)
+                    {
+                        candle.velocity = Vector2.Zero;
+                        SoundEngine.PlaySound(SoundID.Item14, candle.Center);
+
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            NPC.localAI[2] = NPC.SafeDirectionTo(player.Center).ToRotation();
+                            Vector2 baseDirection = NPC.localAI[2].ToRotationVector2();
+                            const int max = 4;
+                            for (int i = 0; i < max; i++)
+                            {
+                                Vector2 offset = baseDirection.RotatedBy(Math.PI * 2 / max * i);
+
+                                Projectile.NewProjectile(candle.GetSource_FromThis(), candle.Center, offset, ModContent.ProjectileType<WispTelegraph>(),
+                                    0, 0f, Main.myPlayer, 0f, 0f, 30f);
+                            }
+                        }
+
+                        AttackTimer = telegraphStart;
+                    }
+                }
+                else if (time > telegraphStart && time < blastTime)
+                {
+                    candle.velocity = Vector2.Zero;
+                }
+                else if (time == blastTime)
+                {
+                    candle.velocity = Vector2.Zero;
+
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        //straight up fargo code, redo in future, but idea is the same, cross explosion o algo
+                        Vector2 baseDirection = NPC.localAI[2].ToRotationVector2();
+                        const int max = 4;
+                        for (int i = 0; i < max; i++)
+                        {
+                            Vector2 offset = NPC.height / 2 * baseDirection.RotatedBy(Math.PI * 2 / max * i);
+                            float ai1 = i <= 1 || i == max - 1 ? 32 : 8;
+
+                            Projectile.NewProjectile(candle.GetSource_FromThis(), candle.Center + Main.rand.NextVector2Circular(NPC.width / 2, NPC.height / 2), Vector2.Zero, ModContent.ProjectileType<WispChainBlast>(),
+                                (NPC.defDamage), 0f, Main.myPlayer, MathHelper.WrapAngle(offset.ToRotation()), ai1);
+                        }
+                    }
+                }
+                else if (time > blastTime && time < restEnd)
+                {
+                    candle.velocity = Vector2.Zero;
+                }
+                else if (time >= restEnd)
+                {
+                    ResetState(ActionState.Idle);
+                }
+            }
         }
         else if (sec == BaseAttack.Enflame)
         {
         }
     }
-
     private void Enflame(Player player, NPC candle, BaseAttack sec)
     {
         if (sec == BaseAttack.None)
@@ -497,7 +631,7 @@ public class MotherWisp : ModNPC
                         Vector2 tipPos = NPC.Center - new Vector2(0, 140f * NPC.scale);
                         Vector2 shootVel = new Vector2(Main.rand.NextFloat(-7f, 7f), Main.rand.NextFloat(-14f, -9f));
 
-                        int projType = ModContent.ProjectileType<WispFireRain>();
+                        int projType = ModContent.ProjectileType<WispFireBreath>();
 
                         Projectile.NewProjectile(NPC.GetSource_FromAI(), tipPos, shootVel,
                             projType, (int)(NPC.damage * 0.5f), 0, -1);

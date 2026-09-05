@@ -292,6 +292,8 @@ Projectiles: {
 	IncendipedeMinionTail.DisplayName: Incendipede Minion Tail
 	WaxWhipProj.DisplayName: Wax Whip Proj
 	WispFireOrb.DisplayName: Wisp Fire Orb
+	WispFireBreath.DisplayName: Wisp Fire Breath
+	WispChainBlast.DisplayName: Wisp Chain Blast
 }
 
 NPCs: {
